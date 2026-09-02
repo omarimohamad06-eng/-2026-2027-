@@ -6,18 +6,19 @@ import { classSelect, moisSelect, emptyState } from '../components/pickers.js';
 import { renderCurrent } from '../router.js';
 import { STATES, CYCLE, nextState } from '../../core/attendance.js';
 import { statsMois } from '../../core/stats.js';
-import { moisLabel, todayISO, spansConges } from '../../core/schoolCalendar.js';
+import { todayISO, spansConges } from '../../core/schoolCalendar.js';
 import { toCSV } from '../../utils/csv.js';
 import { imprimerMois } from '../../export/print.js';
 import { telechargerPdfMois } from '../../export/pdf.js';
+import { t, moisLabelUI } from '../../i18n/index.js';
 
 let brush = 'a';                 // état appliqué au clic (le « pinceau »)
 let saveTimer = null;
 
 export async function renderRegister() {
   if (!app.classes.length) {
-    return emptyState('🏫', 'مرحبا بك', 'أنشئ قسمك الأول ثم أضف التلاميذ لبدء تعبئة السجل.',
-      h('a.btn.btn-primary', { href: '#/classes' }, 'إنشاء قسم'));
+    return emptyState('🏫', t('مرحبا بك'), t('أنشئ قسمك الأول ثم أضف التلاميذ لبدء تعبئة السجل.'),
+      h('a.btn.btn-primary', { href: '#/classes' }, t('إنشاء قسم')));
   }
 
   const cal = app.calendar;
@@ -33,13 +34,13 @@ export async function renderRegister() {
       h('div', { style: { flex: '1 1 220px' } }, classSelect(() => renderCurrent())),
       h('div', { style: { flex: '1 1 160px' } }, moisSelect(() => renderCurrent())),
       h('div.actions', {},
-        h('button.btn', { onclick: () => imprimerMois({ settings: app.settings, cls, cal, mois: app.mois, students, reg }) }, '🖨 طباعة'),
+        h('button.btn', { onclick: () => imprimerMois({ settings: app.settings, cls, cal, mois: app.mois, students, reg }) }, t('🖨 طباعة')),
         h('button.btn.btn-gold', { onclick: async () => {
           toast('جارٍ إنشاء ملف PDF…');
           try { await telechargerPdfMois({ settings: app.settings, cls, cal, mois: [app.mois], students, regs: { [app.mois]: reg } }); }
           catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
-        } }, '⬇ PDF'),
-        h('button.btn', { onclick: () => exporterCSV(cal, cls, app.mois, students, reg) }, '⬇ CSV')),
+        } }, t('⬇ PDF')),
+        h('button.btn', { onclick: () => exporterCSV(cal, cls, app.mois, students, reg) }, t('⬇ CSV'))),
     ));
 
   /* ------- palette de saisie ------- */
@@ -47,23 +48,23 @@ export async function renderRegister() {
     const st = STATES[code];
     const btn = h('button', {
       class: code === brush ? 'on' : '',
-      title: st.label,
+      title: t(st.label),
       onclick: () => { brush = code; [...boutonsBrush].forEach(b => b.classList.toggle('on', b.dataset.code === brush)); },
       dataset: { code },
-    }, h('span.chip', { style: { background: st.couleur } }), st.label || 'مسح');
+    }, h('span.chip', { style: { background: st.couleur } }), t(st.label) || t('مسح'));
     return btn;
   });
   const palette = h('div.card', { style: { paddingBlock: '.6rem' } },
     h('div.brush', {},
-      h('strong.small', { style: { marginInlineEnd: '.4rem' } }, 'أداة التعليم:'),
+      h('strong.small', { style: { marginInlineEnd: '.4rem' } }, t('أداة التعليم:')),
       ...boutonsBrush,
       h('span.muted.small', { style: { marginInlineStart: 'auto' } },
-        'نقرة = تطبيق الأداة · نقرة ثانية = مسح · الأسهم للتنقل · مفاتيح 1‑5')));
+        t('نقرة = تطبيق الأداة · نقرة ثانية = مسح · الأسهم للتنقل · مفاتيح 1‑5'))));
 
   if (!students.length) {
-    wrap.append(barre, emptyState('👥', 'لا يوجد تلاميذ',
-      'أضف تلاميذ هذا القسم لتظهر شبكة الحضور.',
-      h('a.btn.btn-primary', { href: '#/students' }, 'إضافة التلاميذ')));
+    wrap.append(barre, emptyState('👥', t('لا يوجد تلاميذ'),
+      t('أضف تلاميذ هذا القسم لتظهر شبكة الحضور.'),
+      h('a.btn.btn-primary', { href: '#/students' }, t('إضافة التلاميذ'))));
     return wrap;
   }
 
@@ -78,20 +79,20 @@ export async function renderRegister() {
   const today = todayISO();
 
   const thead = h('thead', {}, h('tr', {},
-    h('th.col-rt', {}, 'ر.ت'),
-    h('th.col-nom', {}, 'الاسم والنسب'),
+    h('th.col-rt', {}, t('ر.ت')),
+    h('th.col-nom', {}, t('الاسم والنسب')),
     days.map(d => h('th', {
       class: 'day' + (d.capacite <= 0 ? ' off' : '') + (d.date === today ? ' today' : ''),
-      title: `${d.nom} ${d.jour} — ${d.periode ? d.periode.libelle : (d.kind === 'weekend' ? 'عطلة نهاية الأسبوع' : d.kind === 'hors' ? 'خارج السنة الدراسية' : (d.capacite === 1 ? 'نصف يوم' : 'يوم دراسي'))}`,
+      title: `${t(d.nom)} ${d.jour} — ${d.periode ? d.periode.libelle : (d.kind === 'weekend' ? t('عطلة نهاية الأسبوع') : d.kind === 'hors' ? t('خارج السنة الدراسية') : (d.capacite === 1 ? t('نصف يوم') : t('يوم دراسي')))}`,
     },
       h('span.dnum', {}, String(d.jour)),
       h('span.dab', {}, d.ab),
       labelParJour[d.jour] ? h('span.vlabel', {}, labelParJour[d.jour]) : null)),
-    h('th.sum', {}, 'أنصاف أيام الدراسة'),
-    h('th.sum', {}, 'أنصاف أيام الغياب'),
-    h('th.sum', {}, 'أنصاف أيام الحضور'),
-    h('th.sum', {}, 'النسبة %'),
-    h('th.note', {}, 'ملاحظات')));
+    h('th.sum', {}, t('أنصاف أيام الدراسة')),
+    h('th.sum', {}, t('أنصاف أيام الغياب')),
+    h('th.sum', {}, t('أنصاف أيام الحضور')),
+    h('th.sum', {}, t('النسبة %')),
+    h('th.note', {}, t('ملاحظات'))));
 
   const tbody = h('tbody', {}, s0.rows.map((row, ri) => {
     const st = row.student;
@@ -103,7 +104,7 @@ export async function renderRegister() {
         class: 'cell' + (d.capacite <= 0 ? ' off' : hors ? ' out' : '') + (code ? ' s-' + code : ''),
         tabIndex: d.capacite > 0 && !hors ? 0 : -1,
         dataset: { sid: st.id, jour: d.jour, ri, ci: d.jour },
-        title: d.capacite <= 0 ? (d.periode?.libelle || 'يوم غير دراسي') : `${st.nom} — ${d.jour}`,
+        title: d.capacite <= 0 ? (d.periode?.libelle || t('يوم غير دراسي')) : `${st.nom} — ${d.jour}`,
       }, STATES[code]?.court || '');
       if (d.capacite > 0 && !hors) {
         td.addEventListener('click', () => appliquer(td, st.id, d.jour));
@@ -137,7 +138,7 @@ export async function renderRegister() {
 
   footRefs.taux = h('td.taux-global', { colSpan: 2 }, s0.totals.taux.toFixed(2) + ' %');
   const tfoot = h('tfoot', {}, h('tr', {},
-    h('td', { colSpan: 2 + days.length }, 'نسبة المواظبة الشهرية بـ %'),
+    h('td', { colSpan: 2 + days.length }, t('نسبة المواظبة الشهرية بـ %')),
     footRefs.etude = h('td', {}, String(s0.totals.etude)),
     footRefs.abs = h('td', {}, String(s0.totals.absence)),
     footRefs.taux,
@@ -146,9 +147,9 @@ export async function renderRegister() {
   const table = h('table.register', {}, thead, tbody, tfoot);
   const grille = h('div.card', {},
     h('div.card-head', {},
-      h('h2', {}, `${cls.nom}${cls.fawj ? ' — ' + cls.fawj : ''} · ${moisLabel(app.mois)}`),
+      h('h2', {}, `${cls.nom}${cls.fawj ? ' — ' + cls.fawj : ''} · ${moisLabelUI(app.mois)}`),
       h('span.spacer'),
-      h('span.muted.small', {}, `${s0.totals.joursOuvres} يوم دراسي · ${students.length} تلميذ(ة)`)),
+      h('span.muted.small', {}, t('{j} يوم دراسي · {e} تلميذ(ة)', { j: s0.totals.joursOuvres, e: students.length }))),
     h('div.register-wrap', {}, table));
 
   /* ------- interactions ------- */
@@ -221,7 +222,7 @@ export async function renderRegister() {
   }
 
   const legende = h('p.small.muted', {},
-    'الخانات الرمادية = عطلة أو نهاية أسبوع (غير قابلة للتعليم) · الخانات المخططة = خارج فترة تسجيل التلميذ · الخانة الفارغة = حاضر.');
+    t('الخانات الرمادية = عطلة أو نهاية أسبوع (غير قابلة للتعليم) · الخانات المخططة = خارج فترة تسجيل التلميذ · الخانة الفارغة = حاضر.'));
 
   wrap.append(barre, palette, grille, legende);
   return wrap;
@@ -229,8 +230,8 @@ export async function renderRegister() {
 
 function exporterCSV(cal, cls, mois, students, reg) {
   const s = statsMois(cal, mois, students, reg, app.settings);
-  const entete = ['ر.ت', 'الاسم والنسب', ...s.days.map(d => `${d.jour} ${d.ab}`),
-    'أنصاف أيام الدراسة', 'أنصاف أيام الغياب', 'أنصاف أيام الحضور', 'نسبة المواظبة %', 'ملاحظات'];
+  const entete = [t('ر.ت'), t('الاسم والنسب'), ...s.days.map(d => `${d.jour} ${d.ab}`),
+    t('أنصاف أيام الدراسة'), t('أنصاف أيام الغياب'), t('أنصاف أيام الحضور'), t('نسبة المواظبة %'), t('ملاحظات')];
   const lignes = s.rows.map(r => [
     r.student.rt, r.student.nom,
     ...s.days.map(d => {
@@ -239,5 +240,5 @@ function exporterCSV(cal, cls, mois, students, reg) {
     }),
     r.etude, r.absence, r.presence, r.etude ? r.taux.toFixed(2) : '', r.note,
   ]);
-  download(`سجل-${cls.nom}-${mois}.csv`, toCSV([entete, ...lignes]), 'text/csv');
+  download(`${t('سجل')}-${cls.nom}-${mois}.csv`, toCSV([entete, ...lignes]), 'text/csv');
 }

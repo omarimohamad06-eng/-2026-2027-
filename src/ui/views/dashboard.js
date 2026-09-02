@@ -4,11 +4,11 @@ import * as repo from '../../db/repo.js';
 import { app } from '../app.js';
 import { classSelect, emptyState } from '../components/pickers.js';
 import { statsAnnee, statsMois } from '../../core/stats.js';
-import { moisLabel } from '../../core/schoolCalendar.js';
 import { MOIS_SCOLAIRES } from '../../data/calendar-2026-2027.js';
 import { toCSV } from '../../utils/csv.js';
 import { imprimerPlusieursMois } from '../../export/print.js';
 import { telechargerPdfMois } from '../../export/pdf.js';
+import { t, moisLabelUI } from '../../i18n/index.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}, ...kids) => {
@@ -52,7 +52,7 @@ function graphique(parMois) {
       svg.append(lab);
     }
     const t = svgEl('text', { x: p.x, y: H - 12, 'text-anchor': 'middle', 'font-size': 9.5, fill: '#5c6b66' });
-    t.textContent = moisLabel(p.m.mois).split(' ')[0];
+    t.textContent = moisLabelUI(p.m.mois).split(' ')[0];
     svg.append(t);
   }
   return svg;
@@ -64,8 +64,8 @@ const badgeTaux = t => t >= 95 ? h('span.badge.ok', {}, t.toFixed(1) + '%')
 
 export async function renderDashboard() {
   if (!app.classes.length) {
-    return emptyState('📊', 'لا توجد معطيات', 'أنشئ قسما وأضف تلاميذ لعرض الإحصائيات.',
-      h('a.btn.btn-primary', { href: '#/classes' }, 'إنشاء قسم'));
+    return emptyState('📊', t('لا توجد معطيات'), t('أنشئ قسما وأضف تلاميذ لعرض الإحصائيات.'),
+      h('a.btn.btn-primary', { href: '#/classes' }, t('إنشاء قسم')));
   }
 
   const wrap = h('div');
@@ -79,21 +79,21 @@ export async function renderDashboard() {
     const st = statsAnnee(app.calendar, students, regs, app.settings);
 
     const tuiles = h('div.grid.grid-3', {},
-      h('div.stat', {}, h('div.v', {}, st.global.taux.toFixed(2) + '%'), h('div.l', {}, 'نسبة المواظبة السنوية')),
-      h('div.stat', {}, h('div.v', {}, String(st.global.etude)), h('div.l', {}, 'أنصاف أيام الدراسة')),
-      h('div.stat', {}, h('div.v', {}, String(st.global.absence)), h('div.l', {}, 'أنصاف أيام الغياب')),
-      h('div.stat', {}, h('div.v', {}, String(st.global.enAlerte)), h('div.l', {}, `تلاميذ دون ${app.settings.seuilTauxFaible}%`)),
+      h('div.stat', {}, h('div.v', {}, st.global.taux.toFixed(2) + '%'), h('div.l', {}, t('نسبة المواظبة السنوية'))),
+      h('div.stat', {}, h('div.v', {}, String(st.global.etude)), h('div.l', {}, t('أنصاف أيام الدراسة'))),
+      h('div.stat', {}, h('div.v', {}, String(st.global.absence)), h('div.l', {}, t('أنصاف أيام الغياب'))),
+      h('div.stat', {}, h('div.v', {}, String(st.global.enAlerte)), h('div.l', {}, t('تلاميذ دون {n}%', { n: app.settings.seuilTauxFaible }))),
     );
 
     const tableau = students.length ? h('div.table-wrap', {}, h('table.data', {},
       h('thead', {}, h('tr', {},
-        h('th', { style: { width: '46px' } }, 'ر.ت'),
-        h('th', {}, 'الاسم والنسب'),
-        h('th', { style: { width: '90px' } }, 'الدراسة'),
-        h('th', { style: { width: '90px' } }, 'الغياب'),
-        h('th', { style: { width: '90px' } }, 'منه مبرر'),
-        h('th', { style: { width: '70px' } }, 'التأخرات'),
-        h('th', { style: { width: '110px' } }, 'المواظبة'),
+        h('th', { style: { width: '46px' } }, t('ر.ت')),
+        h('th', {}, t('الاسم والنسب')),
+        h('th', { style: { width: '90px' } }, t('الدراسة')),
+        h('th', { style: { width: '90px' } }, t('الغياب')),
+        h('th', { style: { width: '90px' } }, t('منه مبرر')),
+        h('th', { style: { width: '70px' } }, t('التأخرات')),
+        h('th', { style: { width: '110px' } }, t('المواظبة')),
         h('th', { style: { width: '140px' } }, ''))),
       h('tbody', {}, st.eleves.map(e => h('tr', {},
         h('td', {}, String(e.student.rt)),
@@ -104,7 +104,7 @@ export async function renderDashboard() {
         h('td', {}, String(e.retards)),
         h('td', {}, e.etude ? badgeTaux(e.taux) : '—'),
         h('td', {}, h('div.bar', {}, h('i', { style: { width: Math.max(0, Math.min(100, e.taux)) + '%' } })))))))
-    ) : h('div.empty', {}, h('p.muted', {}, 'لا يوجد تلاميذ في هذا القسم.'));
+    ) : h('div.empty', {}, h('p.muted', {}, t('لا يوجد تلاميذ في هذا القسم.')));
 
     const exportAnnuel = () => {
       // Absences mensuelles exprimées en أنصاف الأيام, comme les totaux annuels.
@@ -112,9 +112,9 @@ export async function renderDashboard() {
         m, new Map(statsMois(app.calendar, m, students, regs[m], app.settings)
           .rows.map(r => [r.student.id, r.absence])),
       ]));
-      const entete = ['ر.ت', 'الاسم والنسب',
-        ...MOIS_SCOLAIRES.map(m => `${moisLabel(m)} (أنصاف أيام الغياب)`),
-        'مجموع أنصاف أيام الدراسة', 'مجموع الغياب', 'منه مبرر', 'التأخرات', 'نسبة المواظبة %'];
+      const entete = [t('ر.ت'), t('الاسم والنسب'),
+        ...MOIS_SCOLAIRES.map(m => `${moisLabelUI(m)} (${t('أنصاف أيام الغياب')})`),
+        t('مجموع أنصاف أيام الدراسة'), t('مجموع الغياب'), t('منه مبرر'), t('التأخرات'), t('نسبة المواظبة %')];
       const lignes = st.eleves
         .slice().sort((a, b) => a.student.rt - b.student.rt)
         .map(e => [
@@ -122,20 +122,20 @@ export async function renderDashboard() {
           ...MOIS_SCOLAIRES.map(m => absencesParMois[m].get(e.student.id) ?? 0),
           e.etude, e.absence, e.justifiee, e.retards, e.etude ? e.taux.toFixed(2) : '',
         ]);
-      download(`حصيلة-سنوية-${cls.nom}.csv`, toCSV([entete, ...lignes]), 'text/csv');
+      download(`${t('حصيلة-سنوية')}-${cls.nom}.csv`, toCSV([entete, ...lignes]), 'text/csv');
     };
 
     corps.append(
       h('div.card', {},
         h('div.card-head', {},
-          h('h2', {}, `الحصيلة السنوية — ${cls.nom}`),
+          h('h2', {}, `${t('الحصيلة السنوية')} — ${cls.nom}`),
           h('span.spacer'),
           h('div.actions', {},
-            h('button.btn', { onclick: exportAnnuel }, '⬇ CSV سنوي'),
+            h('button.btn', { onclick: exportAnnuel }, t('⬇ CSV سنوي')),
             h('button.btn', {
               onclick: () => imprimerPlusieursMois({
                 settings: app.settings, cls, cal: app.calendar, moisListe: MOIS_SCOLAIRES, students, regs }),
-            }, '🖨 طباعة كل الأشهر'),
+            }, t('🖨 طباعة كل الأشهر')),
             h('button.btn.btn-gold', {
               onclick: async () => {
                 toast('جارٍ إنشاء ملف PDF للسنة كاملة…');
@@ -144,12 +144,12 @@ export async function renderDashboard() {
                     mois: MOIS_SCOLAIRES, students, regs });
                 } catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
               },
-            }, '⬇ PDF السنة'))),
+            }, t('⬇ PDF السنة')))),
         tuiles),
-      h('div.card', {}, h('div.card-head', {}, h('h2', {}, 'تطور نسبة المواظبة')), graphique(st.parMois)),
+      h('div.card', {}, h('div.card-head', {}, h('h2', {}, t('تطور نسبة المواظبة'))), graphique(st.parMois)),
       h('div.card', {},
-        h('div.card-head', {}, h('h2', {}, 'التلاميذ حسب المواظبة'),
-          h('span.spacer'), h('span.muted.small', {}, 'مرتبة تصاعديا — الأكثر غيابا في الأعلى')),
+        h('div.card-head', {}, h('h2', {}, t('التلاميذ حسب المواظبة')),
+          h('span.spacer'), h('span.muted.small', {}, t('مرتبة تصاعديا — الأكثر غيابا في الأعلى'))),
         tableau));
   };
 

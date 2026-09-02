@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   enseignant: 'الأستاذ عمري محمد',
   enseignantFr: 'Pr. Omari Mohammed',
   anneeScolaire: '2026/2027',
+  langue: 'ar',                    // 'ar' ou 'fr' — langue de l'interface
   seuilAlerteAbsence: 8,   // nombre d'anssaf ayam d'absence déclenchant une alerte (par mois)
   seuilTauxFaible: 90,     // taux de fréquentation (%) sous lequel l'élève est signalé
   updatedAt: null,

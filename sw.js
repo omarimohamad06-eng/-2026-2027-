@@ -1,10 +1,10 @@
 /* Service worker : met l'application en cache pour un usage 100 % hors-ligne. */
-const CACHE = 'sijil-hodour-v1';
+const CACHE = 'sijil-hodour-v2';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './assets/css/theme.css', './assets/css/app.css', './assets/css/print.css',
   './assets/img/icon.svg',
-  './src/main.js',
+  './src/main.js', './src/i18n/index.js',
   './src/db/idb.js', './src/db/repo.js', './src/db/backup.js',
   './src/data/defaults.js', './src/data/levels.js', './src/data/calendar-2026-2027.js',
   './src/core/schoolCalendar.js', './src/core/attendance.js', './src/core/stats.js',

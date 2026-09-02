@@ -33,6 +33,13 @@ a{color:var(--vert-clair)}
 .nav a:hover{background:rgba(255,255,255,.12)}
 .nav a.active{background:var(--dore);color:var(--vert);border-color:var(--dore);font-weight:700}
 
+.lang-btn{
+  font-family:var(--police-ui);font-size:.78rem;font-weight:800;cursor:pointer;
+  color:var(--vert);background:var(--dore-pale);border:1px solid var(--dore);
+  border-radius:999px;padding:.25rem .6rem;min-width:34px;line-height:1.4;
+}
+.lang-btn:hover{background:var(--dore)}
+
 .view{flex:1;padding:1rem;max-width:1600px;width:100%;margin:0 auto}
 .credits{text-align:center;color:var(--texte-doux);font-size:.75rem;padding:.8rem}
 
@@ -93,11 +100,16 @@ table.data tbody tr:nth-child(even){background:#fbfaf5}
 table.data tbody tr:hover{background:var(--vert-pale)}
 
 /* ---------- Grille du registre ---------- */
-.register-wrap{overflow:auto;max-height:72vh;border:2px solid var(--vert);border-radius:6px;background:#fff}
+.register-wrap{overflow:auto;max-height:72vh;border:2px solid var(--vert);border-radius:6px;background:#fff;direction:rtl}
+.register-wrap>table.register{direction:rtl}
 table.register{border-collapse:separate;border-spacing:0;font-size:.8rem;width:max-content;min-width:100%}
 table.register th,table.register td{
   border-inline-start:1px solid var(--bord);border-block-end:1px solid var(--bord);
   padding:0;text-align:center;white-space:nowrap;
+  /* La grille reste ordonnée de droite à gauche comme le registre officiel,
+     mais chaque cellule s'écrit dans le sens de son propre texte : les noms
+     arabes restent RTL, les libellés français passent en LTR. */
+  unicode-bidi:plaintext;
 }
 table.register thead th{
   background:var(--vert);color:#fff;position:sticky;top:0;z-index:20;

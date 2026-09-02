@@ -16,6 +16,7 @@
 | PDF (téléchargement direct) | **`src/export/pdf.js`** : la page est dessinée sur un `<canvas>` puis encapsulée dans un PDF écrit octet par octet (image JPEG `/DCTDecode`) | jsPDF ne fait pas le *shaping* arabe (lettres détachées et inversées). Le canvas laisse le navigateur composer l'arabe, et le PDF est produit sans aucune librairie. |
 | Graphiques | **SVG généré à la main** (pas de librairie) | Un seul graphe simple ; évite 300 Ko de dépendance. |
 | Import Excel | **CSV (UTF-8, `,` `;` ou tabulation) + collage direct depuis Excel** | Couvre Excel sans embarquer SheetJS (~800 Ko). |
+| Langue | **Bascule arabe / français de l'interface**, la clé de traduction étant la chaîne arabe elle-même | Une chaîne non traduite retombe sur l'arabe, jamais sur un code technique. Le registre imprimé et les PDF restent en arabe : ce sont des documents officiels. |
 | Polices | Pile système `Amiri, Cairo, Noto Naskh Arabic, Tahoma, serif` | Les fichiers de polices n'ont pas pu être récupérés (accès CDN bloqué) ; déposer les `.woff2` dans `assets/fonts/` et les déclarer en `@font-face` suffit à figer le rendu. |
 
 ---
@@ -63,6 +64,8 @@
 │   ├── export/
 │   │   ├── print.js               # page imprimable A4 paysage
 │   │   └── pdf.js                 # PDF téléchargeable (canvas → PDF, sans librairie)
+│   ├── i18n/
+│   │   └── index.js               # bascule arabe/français (clé = la chaîne arabe)
 │   └── utils/
 │       ├── dom.js                 # h(), toast, modale, téléchargement
 │       └── csv.js                 # lecture/écriture CSV et TSV

@@ -154,6 +154,7 @@ src/core/stats.js          taux mensuels et annuels, alertes
 src/ui/…                   routeur et écrans
 src/export/print.js        page imprimable fidèle au registre officiel
 src/export/pdf.js          générateur PDF autonome (canvas → PDF)
+src/i18n/index.js          dictionnaire arabe / français de l'interface
 docs/MODELE-DONNEES.md     modèle de données détaillé
 ```
 
@@ -162,7 +163,25 @@ Le modèle de données (settings / classes / students / registers / calendar) es
 
 ---
 
-## 9. Sur tablette et téléphone
+## 9. Arabe ou français
+
+Le bouton **FR / ع** en haut de l'écran bascule toute l'interface entre l'arabe et le français
+(le même réglage existe dans **Paramètres → Langue de l'interface**). Le choix est enregistré :
+l'application se rouvre dans la dernière langue utilisée.
+
+En français, la page passe de droite-à-gauche à gauche-à-droite, **sauf la grille du registre**,
+qui garde l'ordre officiel : le jour 1 à droite, les colonnes ر.ت et le nom figées à droite, et
+les abréviations arabes des jours (أ ث ث ر خ ج س) — exactement comme sur le registre papier.
+Survoler l'en-tête d'un jour affiche le jour de la semaine dans la langue choisie.
+
+**Ce qui reste toujours en arabe**, quelle que soit la langue de l'interface :
+la feuille imprimée, l'export PDF, ainsi que les données que vous saisissez
+(noms des élèves et des classes, intitulés des vacances, informations de l'établissement).
+Le registre est un document officiel : sa mise en forme ne dépend pas de la langue de travail.
+
+---
+
+## 10. Sur tablette et téléphone
 
 L'interface s'adapte : la barre de navigation passe sur deux lignes, les sélecteurs et
 les boutons s'empilent, et les tableaux larges (élèves, statistiques, rzenama) défilent
@@ -174,7 +193,7 @@ La saisie confortable d'une classe entière reste néanmoins plus rapide sur ord
 
 ---
 
-## 10. Compatibilité
+## 11. Compatibilité
 
 Navigateurs récents pour ordinateur et tablette : Chrome/Edge 100+, Firefox 100+, Safari 16+.
 La navigation privée empêche le stockage local : utilisez une fenêtre normale.

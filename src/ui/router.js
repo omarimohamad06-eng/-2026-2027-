@@ -1,5 +1,6 @@
 /** Routage par hash + barre de navigation. */
 import { qs, clear, h } from '../utils/dom.js';
+import { t } from '../i18n/index.js';
 
 const routes = new Map();
 let current = null;
@@ -16,7 +17,7 @@ export function renderNav() {
   const active = location.hash.slice(1) || '/register';
   for (const [path, def] of routes) {
     if (!def.label) continue;
-    nav.append(h('a', { href: '#' + path, class: path === active ? 'active' : '' }, def.label));
+    nav.append(h('a', { href: '#' + path, class: path === active ? 'active' : '' }, t(def.label)));
   }
 }
 
@@ -32,7 +33,7 @@ export async function renderCurrent() {
     if (node) view.append(node);
   } catch (err) {
     console.error(err);
-    view.append(h('div.card', {}, h('h2', {}, 'خطأ'), h('p.muted', {}, String(err.message || err))));
+    view.append(h('div.card', {}, h('h2', {}, t('خطأ')), h('p.muted', {}, String(err.message || err))));
   }
 }
 
