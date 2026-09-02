@@ -21,11 +21,35 @@ python3 -m http.server 8000
 # puis ouvrir http://localhost:8000
 ```
 
-### Option B — publication sur GitHub Pages
-Poussez le dépôt, activez **Settings → Pages → Deploy from a branch**, puis ouvrez l'URL fournie.
+### Option B — mettre le site en ligne (GitHub Pages, gratuit)
+Sur GitHub : **Settings → Pages → Build and deployment → Source : Deploy from a branch**,
+puis choisir la branche `claude/attendance-register-app-htpei6` et le dossier `/ (root)`, et **Save**.
+Au bout d'une minute le site est disponible à l'adresse :
+
+```
+https://omarimohamad06-eng.github.io/-2026-2027-/
+```
+
 Au premier chargement, l'application se met en cache : elle fonctionne ensuite **sans connexion**,
 et peut être installée comme application (bouton « Installer » du navigateur, ou
 *Partager → Sur l'écran d'accueil* sur tablette).
+
+### Option C — le fichier unique, sans rien installer
+`dist/sijil-hodour.html` contient toute l'application dans un seul fichier (environ 135 Ko) :
+téléchargez-le, puis **ouvrez-le par un double-clic**. Ni serveur, ni connexion, ni installation.
+Pratique pour une clé USB ou l'ordinateur de la salle des professeurs.
+
+Ce fichier se régénère à partir des sources par :
+
+```bash
+node tools/build-standalone.js
+```
+
+> Vérifié sous Chrome/Chromium et Edge. Certains navigateurs refusent le stockage local
+> pour un fichier ouvert en `file://` : si l'application affiche « تعذر فتح قاعدة البيانات »,
+> utilisez la version en ligne (option B) ou le petit serveur local (option A).
+> Chaque emplacement a sa propre base de données : les données du fichier local et celles
+> du site en ligne sont distinctes — utilisez l'export/import JSON pour passer de l'une à l'autre.
 
 ---
 
@@ -155,6 +179,8 @@ src/ui/…                   routeur et écrans
 src/export/print.js        page imprimable fidèle au registre officiel
 src/export/pdf.js          générateur PDF autonome (canvas → PDF)
 src/i18n/index.js          dictionnaire arabe / français de l'interface
+tools/build-standalone.js  fabrique dist/sijil-hodour.html (fichier unique)
+dist/sijil-hodour.html     l'application entière en un seul fichier
 docs/MODELE-DONNEES.md     modèle de données détaillé
 ```
 
