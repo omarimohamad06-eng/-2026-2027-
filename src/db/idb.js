@@ -3,7 +3,7 @@
  * pour un fonctionnement 100 % hors-ligne.
  */
 const DB_NAME = 'sijil_hodour_2026_2027';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 /** store -> { keyPath, indexes: [[nom, chemin]] } */
 const SCHEMA = {
@@ -12,7 +12,13 @@ const SCHEMA = {
   students : { keyPath: 'id', indexes: [['classId', 'classId']] },
   registers: { keyPath: 'id', indexes: [['classId', 'classId'], ['mois', 'mois']] },
   calendar : { keyPath: 'id', indexes: [] },
+  // Ajoutés en version 2, pour la synchronisation :
+  deletions: { keyPath: 'cle', indexes: [] },   // pierres tombales { cle:'store/id', store, id, deletedAt }
+  sync     : { keyPath: 'id', indexes: [] },    // état local de la synchronisation (id = 1)
 };
+
+/** Stores porteurs de données métier, ceux que la synchronisation fait circuler. */
+export const STORES_DONNEES = ['settings', 'classes', 'students', 'registers', 'calendar'];
 
 export const STORES = Object.keys(SCHEMA);
 

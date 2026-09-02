@@ -281,6 +281,91 @@ const FR = {
   'حذف كل شيء': 'Tout supprimer',
   'تم محو كل المعطيات': 'Toutes les données ont été effacées',
 
+  /* --- Synchronisation --- */
+  'المزامنة': 'Synchronisation',
+  'المزامنة بين الأجهزة': 'Synchronisation entre appareils',
+  'المزامنة اختيارية. بدونها يشتغل التطبيق كما هو، والمعطيات محفوظة في هذا المتصفح فقط. ':
+    'La synchronisation est facultative. Sans elle, l’application fonctionne comme avant et les données restent dans ce seul navigateur. ',
+  'عند تفعيلها، تبقى قاعدة البيانات المحلية هي المرجع، ويُستعمل Firebase كنسخة مطابقة تتيح فتح نفس السجل على حاسوب آخر أو على لوحة.':
+    'Une fois activée, la base locale reste la référence : Firebase n’en est qu’un miroir, qui permet d’ouvrir le même registre sur un autre ordinateur ou sur une tablette.',
+  'حساب واحد = جهاز واحد مسجَّل. عند الاتصال من جهاز جديد يجب تحرير الجهاز السابق أو الاستيلاء على مكانه.':
+    'Un compte = un seul appareil enregistré. Pour vous connecter depuis un nouvel appareil, libérez le précédent ou prenez sa place.',
+  'مشروع Firebase': 'Projet Firebase',
+  'يمكنك تغيير المشروع إن لزم الأمر.': 'Vous pouvez changer de projet si nécessaire.',
+  'حذف إعدادات Firebase': 'Effacer la configuration Firebase',
+  'سيتم نسيان إعدادات المشروع على هذا الجهاز. المعطيات المحلية لا تُمسّ.':
+    'La configuration du projet sera oubliée sur cet appareil. Vos données locales ne sont pas touchées.',
+  'تغيير المشروع': 'Changer de projet',
+  'الخطوة 1 — إعداد مشروع Firebase': 'Étape 1 — créer le projet Firebase',
+  'أنشئ مشروعا مجانيا في ': 'Créez un projet gratuit sur ',
+  'في Authentication، فعّل طريقة «Email/Password».':
+    'Dans Authentication, activez la méthode « Email/Password ».',
+  'في Firestore Database، أنشئ قاعدة بيانات ثم الصق قواعد الأمان الموجودة في ملف firestore.rules.':
+    'Dans Firestore Database, créez la base puis collez les règles de sécurité du fichier firestore.rules.',
+  'في Project settings ← Your apps، أضف تطبيق ويب وانسخ كتلة firebaseConfig.':
+    'Dans Project settings → Your apps, ajoutez une application web et copiez le bloc firebaseConfig.',
+  'الصقها أسفله.': 'Collez-le ci-dessous.',
+  'إعدادات المشروع (firebaseConfig)': 'Configuration du projet (firebaseConfig)',
+  'تم حفظ إعدادات Firebase ✓': 'Configuration Firebase enregistrée ✓',
+  'حفظ الإعدادات': 'Enregistrer la configuration',
+  'الخطوة 2 — الحساب': 'Étape 2 — le compte',
+  'البريد الإلكتروني': 'Adresse e-mail',
+  'كلمة المرور': 'Mot de passe',
+  'اتصال': 'Se connecter',
+  'إنشاء حساب جديد': 'Créer un compte',
+  'أدخل البريد وكلمة المرور': 'Saisissez l’e-mail et le mot de passe',
+  'استعمل بريدك المهني. كلمة المرور من 6 أحرف على الأقل.':
+    'Utilisez votre adresse professionnelle. Mot de passe : 6 caractères minimum.',
+  'تم الاتصال ✓ ({r} واردة، {e} صادرة)': 'Connecté ✓ ({r} reçus, {e} envoyés)',
+  'تمت المزامنة ✓ ({r} واردة، {e} صادرة)': 'Synchronisation terminée ✓ ({r} reçus, {e} envoyés)',
+  'الحساب مسجَّل على جهاز آخر': 'Compte enregistré sur un autre appareil',
+  'هذا الحساب مرتبط حاليا بـ «{appareil}». هل تريد نقل التسجيل إلى هذا الجهاز؟ سيفقد الجهاز الآخر حق المزامنة.':
+    'Ce compte est actuellement lié à « {appareil} ». Transférer l’enregistrement sur cet appareil ? L’autre appareil perdra le droit de synchroniser.',
+  'نقل إلى هذا الجهاز': 'Transférer ici',
+  'جهاز آخر': 'un autre appareil',
+  'المزامنة مفعّلة': 'Synchronisation active',
+  'جارية…': 'en cours…',
+  'متصل': 'connecté',
+  'الحساب': 'Compte',
+  'الجهاز المسجَّل': 'Appareil enregistré',
+  'آخر مزامنة': 'Dernière synchronisation',
+  'لم تتم أي مزامنة بعد': 'aucune synchronisation pour l’instant',
+  'الحالة': 'État',
+  'كل شيء متزامن': 'tout est synchronisé',
+  'مزامنة تلقائية (كل 10 دقائق وبعد كل تعديل)':
+    'Synchronisation automatique (toutes les 10 minutes et après chaque modification)',
+  '⟳ مزامنة الآن': '⟳ Synchroniser maintenant',
+  'قطع الاتصال': 'Se déconnecter',
+  'ستبقى كل المعطيات على هذا الجهاز. يمكنك إعادة الاتصال لاحقا.':
+    'Toutes les données restent sur cet appareil. Vous pourrez vous reconnecter plus tard.',
+  'تم قطع الاتصال': 'Déconnecté',
+  'تحرير الجهاز': 'Libérer l’appareil',
+  'سيتحرر مكان الجهاز حتى تتمكن من الاتصال من جهاز آخر. المعطيات لا تُمسّ.':
+    'Le créneau d’appareil sera libéré pour vous connecter depuis un autre poste. Les données ne sont pas touchées.',
+  'تحرير': 'Libérer',
+  'تم تحرير الجهاز': 'Appareil libéré',
+
+  /* --- Messages d'erreur de synchronisation --- */
+  'الصق إعدادات Firebase أولا': 'Collez d’abord la configuration Firebase',
+  'تعذرت قراءة الإعدادات: تأكد من نسخ الكتلة كاملة':
+    'Configuration illisible : vérifiez que le bloc a été copié en entier',
+  'الإعدادات ناقصة': 'Configuration incomplète',
+  'لم يتم إعداد Firebase بعد': 'Firebase n’est pas encore configuré',
+  'تعذر تحميل Firebase: تحقق من الاتصال بالإنترنت':
+    'Impossible de charger Firebase : vérifiez la connexion internet',
+  'البريد الإلكتروني غير صالح': 'Adresse e-mail invalide',
+  'لا يوجد حساب بهذا البريد': 'Aucun compte avec cette adresse',
+  'كلمة المرور غير صحيحة': 'Mot de passe incorrect',
+  'هذا البريد مستعمل من قبل: اختر «الاتصال» بدل «إنشاء حساب»':
+    'Cette adresse est déjà utilisée : choisissez « Se connecter » plutôt que « Créer un compte »',
+  'كلمة المرور قصيرة جدا (6 أحرف على الأقل)': 'Mot de passe trop court (6 caractères minimum)',
+  'تعذر الاتصال بالخادم': 'Impossible de joindre le serveur',
+  'الخادم رفض العملية: تحقق من قواعد الأمان في Firestore':
+    'Le serveur a refusé l’opération : vérifiez les règles de sécurité Firestore',
+  'لا يوجد اتصال بالإنترنت': 'Pas de connexion internet',
+  'لست متصلا بالحساب': 'Vous n’êtes pas connecté au compte',
+  'حدث خطأ غير متوقع': 'Une erreur inattendue s’est produite',
+
   /* --- Noms de fichiers exportés --- */
   'فوج 1': 'Groupe 1',
   'سجل': 'registre',

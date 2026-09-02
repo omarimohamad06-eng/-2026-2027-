@@ -1,0 +1,55 @@
+rules_version = '2';
+
+/**
+ * Règles de sécurité Firestore — سجل الحضور والغياب
+ *
+ * À coller dans la console Firebase : Firestore Database → Rules → Publish.
+ *
+ * Deux garanties :
+ *   1. chaque enseignant ne voit et n'écrit que ses propres données ;
+ *   2. seules les écritures venant de l'appareil enregistré sont acceptées
+ *      (un compte = un appareil), la marque `_device` étant comparée au
+ *      créneau d'appareil stocké dans users/{uid}.
+ *
+ * Changer d'appareil reste possible : l'application écrit alors un nouveau
+ * `device` dans users/{uid} — opération volontaire, confirmée par une boîte
+ * de dialogue.
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estProprietaire(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function appareilEnregistre(uid) {
+      let doc = get(/databases/$(database)/documents/users/$(uid));
+      return doc != null && 'device' in doc.data && doc.data.device != null
+        ? doc.data.device.id : null;
+    }
+
+    // Fiche de l'utilisateur : compte et appareil enregistré.
+    match /users/{uid} {
+      allow read, write: if estProprietaire(uid);
+
+      // Collections de données : settings, classes, students, registers,
+      // calendar et les pierres tombales (deletions).
+      match /{collection}/{docId} {
+        allow read: if estProprietaire(uid)
+          && collection in ['settings', 'classes', 'students', 'registers', 'calendar', 'deletions'];
+
+        allow create, update: if estProprietaire(uid)
+          && collection in ['settings', 'classes', 'students', 'registers', 'calendar', 'deletions']
+          && request.resource.data._device == appareilEnregistre(uid);
+
+        allow delete: if estProprietaire(uid)
+          && collection in ['settings', 'classes', 'students', 'registers', 'calendar', 'deletions'];
+      }
+    }
+
+    // Tout le reste est refusé.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

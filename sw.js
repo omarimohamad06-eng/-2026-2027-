@@ -1,5 +1,5 @@
 /* Service worker : met l'application en cache pour un usage 100 % hors-ligne. */
-const CACHE = 'sijil-hodour-v2';
+const CACHE = 'sijil-hodour-v3';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './assets/css/theme.css', './assets/css/app.css', './assets/css/print.css',
@@ -13,6 +13,9 @@ const FICHIERS = [
   './src/ui/views/register.js', './src/ui/views/dashboard.js', './src/ui/views/calendar.js',
   './src/ui/views/backup.js',
   './src/export/print.js', './src/export/pdf.js',
+  './src/ui/views/sync.js',
+  './src/sync/index.js', './src/sync/engine.js', './src/sync/local-idb.js',
+  './src/sync/remote-firebase.js', './src/sync/remote-memory.js',
   './src/utils/dom.js', './src/utils/csv.js',
 ];
 

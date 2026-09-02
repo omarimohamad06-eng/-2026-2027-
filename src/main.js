@@ -12,6 +12,8 @@ import { renderDashboard } from './ui/views/dashboard.js';
 import { renderCalendar }  from './ui/views/calendar.js';
 import { renderSetup }     from './ui/views/setup.js';
 import { renderBackup }    from './ui/views/backup.js';
+import { renderSync }      from './ui/views/sync.js';
+import * as sync           from './sync/index.js';
 
 route('/register',  'سجل الشهر',       renderRegister);
 route('/students',  'التلاميذ',        renderStudents);
@@ -20,6 +22,7 @@ route('/dashboard', 'الإحصائيات',      renderDashboard);
 route('/calendar',  'الرزنامة',        renderCalendar);
 route('/setup',     'الإعداد',         renderSetup);
 route('/backup',    'النسخ الاحتياطي', renderBackup);
+route('/sync',      'المزامنة',        renderSync);
 
 /** Met à jour les éléments hors routeur (titre, sous-titre) après un changement de langue. */
 function appliquerLangue() {
@@ -74,6 +77,12 @@ async function demarrer() {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
   addEventListener('online',  () => toast(t('تم استرجاع الاتصال')));
+
+  // Synchronisation : reprise silencieuse de la session, puis cadence automatique.
+  addEventListener('donnees-modifiees', () => sync.signalerModification());
+  sync.reprendre()
+    .then(session => { if (session) return sync.demarrerAuto(); })
+    .catch(() => { /* la synchronisation ne doit jamais empêcher l'application de démarrer */ });
 }
 
 demarrer();

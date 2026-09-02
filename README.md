@@ -179,6 +179,11 @@ src/ui/…                   routeur et écrans
 src/export/print.js        page imprimable fidèle au registre officiel
 src/export/pdf.js          générateur PDF autonome (canvas → PDF)
 src/i18n/index.js          dictionnaire arabe / français de l'interface
+src/sync/engine.js         fusion « dernière écriture gagnante » (sans Firebase)
+src/sync/local-idb.js      côté local de la synchronisation
+src/sync/remote-firebase.js  adaptateur Firestore + authentification
+src/sync/remote-memory.js  serveur factice, utilisé par les tests
+firestore.rules            règles de sécurité à coller dans la console Firebase
 tools/build-standalone.js  fabrique dist/sijil-hodour.html (fichier unique)
 dist/sijil-hodour.html     l'application entière en un seul fichier
 docs/MODELE-DONNEES.md     modèle de données détaillé
@@ -189,7 +194,51 @@ Le modèle de données (settings / classes / students / registers / calendar) es
 
 ---
 
-## 9. Arabe ou français
+## 9. Synchronisation entre appareils (Firebase)
+
+**Facultative.** Sans elle, rien ne change : l'application reste hors ligne et les données
+vivent dans le seul navigateur utilisé. Activée, elle permet d'ouvrir le même registre sur
+l'ordinateur de la maison, celui de l'établissement et une tablette.
+
+La base locale reste la référence ; Firestore n'en est qu'un miroir. Si le nuage est
+injoignable, la saisie continue normalement et repartira à la prochaine synchronisation.
+
+### Préparer le projet Firebase (une seule fois, gratuit)
+
+1. Créer un projet sur [console.firebase.google.com](https://console.firebase.google.com/).
+2. **Authentication → Sign-in method** : activer **Email/Password**.
+3. **Firestore Database** : créer la base (mode production).
+4. **Firestore → Rules** : coller le contenu de [`firestore.rules`](firestore.rules), puis *Publish*.
+5. **Project settings → Your apps → Web** : ajouter une application, copier le bloc `firebaseConfig`.
+6. Dans l'application, écran **المزامنة**, coller ce bloc, puis créer le compte avec votre e-mail.
+
+### Un compte, un appareil
+
+Le compte n'accepte qu'un seul appareil enregistré à la fois. En vous connectant depuis un
+nouveau poste, l'application affiche quel appareil occupe la place et propose de transférer
+l'enregistrement ; l'ancien poste cesse alors de synchroniser (ses données locales restent
+intactes). Vous pouvez aussi libérer la place volontairement depuis l'appareil courant.
+
+Cette limite est appliquée **côté serveur** : chaque écriture porte l'identifiant de
+l'appareil, et les règles de sécurité rejettent celles qui ne viennent pas de l'appareil
+enregistré. Les règles garantissent aussi qu'un compte ne peut lire ou écrire que ses
+propres données.
+
+### Comment les modifications sont fusionnées
+
+Chaque enregistrement porte sa date de dernière modification, chaque suppression laisse une
+trace datée. À la synchronisation, la version la plus récente l'emporte ; à égalité stricte
+de date, la donnée l'emporte sur la suppression — entre perdre et garder, on garde.
+La synchronisation part automatiquement toutes les 10 minutes, 20 secondes après la
+dernière saisie, et au retour de la connexion ; le bouton **⟳ مزامنة الآن** la déclenche à la demande.
+
+> La synchronisation suppose une vraie adresse web : utilisez la version publiée
+> (option B ci-dessus). Depuis le fichier unique ouvert en `file://`, Firebase peut refuser
+> l'authentification, faute de domaine autorisé.
+
+---
+
+## 10. Arabe ou français
 
 Le bouton **FR / ع** en haut de l'écran bascule toute l'interface entre l'arabe et le français
 (le même réglage existe dans **Paramètres → Langue de l'interface**). Le choix est enregistré :
@@ -207,7 +256,7 @@ Le registre est un document officiel : sa mise en forme ne dépend pas de la lan
 
 ---
 
-## 10. Sur tablette et téléphone
+## 11. Sur tablette et téléphone
 
 L'interface s'adapte : la barre de navigation passe sur deux lignes, les sélecteurs et
 les boutons s'empilent, et les tableaux larges (élèves, statistiques, rzenama) défilent
@@ -219,7 +268,7 @@ La saisie confortable d'une classe entière reste néanmoins plus rapide sur ord
 
 ---
 
-## 11. Compatibilité
+## 12. Compatibilité
 
 Navigateurs récents pour ordinateur et tablette : Chrome/Edge 100+, Firefox 100+, Safari 16+.
 La navigation privée empêche le stockage local : utilisez une fenêtre normale.

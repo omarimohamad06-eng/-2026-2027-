@@ -16,6 +16,7 @@
 | PDF (téléchargement direct) | **`src/export/pdf.js`** : la page est dessinée sur un `<canvas>` puis encapsulée dans un PDF écrit octet par octet (image JPEG `/DCTDecode`) | jsPDF ne fait pas le *shaping* arabe (lettres détachées et inversées). Le canvas laisse le navigateur composer l'arabe, et le PDF est produit sans aucune librairie. |
 | Graphiques | **SVG généré à la main** (pas de librairie) | Un seul graphe simple ; évite 300 Ko de dépendance. |
 | Import Excel | **CSV (UTF-8, `,` `;` ou tabulation) + collage direct depuis Excel** | Couvre Excel sans embarquer SheetJS (~800 Ko). |
+| Synchronisation | **Facultative, Firestore + Auth e-mail/mot de passe**, SDK chargé à la demande depuis gstatic | Le moteur de fusion (`src/sync/engine.js`) ignore Firebase : il travaille contre une interface `pull/push`, ce qui permet de le tester contre un serveur factice. IndexedDB reste la source de vérité. |
 | Langue | **Bascule arabe / français de l'interface**, la clé de traduction étant la chaîne arabe elle-même | Une chaîne non traduite retombe sur l'arabe, jamais sur un code technique. Le registre imprimé et les PDF restent en arabe : ce sont des documents officiels. |
 | Polices | Pile système `Amiri, Cairo, Noto Naskh Arabic, Tahoma, serif` | Les fichiers de polices n'ont pas pu être récupérés (accès CDN bloqué) ; déposer les `.woff2` dans `assets/fonts/` et les déclarer en `@font-face` suffit à figer le rendu. |
 
@@ -191,7 +192,25 @@ Quand plusieurs périodes couvrent une même date, **la plus courte l'emporte** 
 Le `libelle` s'affiche **verticalement** dans la colonne, comme sur le registre papier.
 `confirme: false` = date estimée (fêtes religieuses mobiles, notes ministérielles non encore publiées) : l'app affiche un bandeau « à vérifier » et un bouton de correction en un clic.
 
-### 3.6 Champs calculés (jamais stockés, recalculés à la volée)
+### 3.6 Stores ajoutés pour la synchronisation (version 2 de la base)
+
+```json
+// deletions — une pierre tombale par suppression, pour qu'elle voyage
+{ "cle": "students/std_0a1b2c", "store": "students", "id": "std_0a1b2c",
+  "deletedAt": "2026-10-14T09:12:00.000Z" }
+
+// sync — état local, jamais synchronisé ni sauvegardé
+{ "id": 1, "actif": true, "email": "prof@example.org", "uid": "…",
+  "deviceId": "dev_…", "deviceLabel": "Chrome — Windows",
+  "derniereSync": "2026-10-14T09:15:00.000Z", "auto": true, "derniereErreur": "" }
+```
+
+Tous les enregistrements métier portent désormais `updatedAt`. La fusion applique la règle
+« dernière écriture gagnante » ; à égalité stricte, le document l'emporte sur la suppression.
+Les enregistrements antérieurs à la version 2 sont horodatés une fois, au premier démarrage
+suivant la mise à jour.
+
+### 3.7 Champs calculés (jamais stockés, recalculés à la volée)
 
 Pour chaque élève et chaque mois :
 
