@@ -1,6 +1,6 @@
 # سجل الحضور والغياب 2026/2027 — Structure & modèle de données
 
-> Document de cadrage à valider **avant** l'implémentation complète.
+> Document de référence, mis à jour après implémentation.
 > Auteur du registre : Pr. Omari Mohammed — Lycée Qualifiant Tilmi — Direction Provinciale de Tinghir — AREF Drâa-Tafilalet.
 
 ---
@@ -10,12 +10,13 @@
 | Sujet | Proposition | Justification |
 |---|---|---|
 | Front | **HTML/CSS/JS vanilla, modules ES, sans build** | Ouverture par simple `index.html` ou GitHub Pages, aucun `npm install` chez l'utilisateur, mise à jour = remplacer des fichiers. |
-| Stockage | **IndexedDB via Dexie.js** (vendorisé dans `/vendor`, pas de CDN) | Volume (6 classes × 10 mois × 40 élèves × 31 jours) + fonctionnement 100 % hors-ligne. |
+| Stockage | **IndexedDB**, via une mini-couche maison `src/db/idb.js` (~90 lignes) | Volume (6 classes × 10 mois × 40 élèves × 31 jours) + fonctionnement 100 % hors-ligne. Dexie n'a pas été retenu : aucune dépendance à vendoriser ni à maintenir. |
 | Hors-ligne | **Service Worker** (cache de l'app) + `manifest.webmanifest` (installable) | « Utilisable sans connexion une fois chargée ». |
-| PDF | **Impression navigateur → Enregistrer en PDF**, avec CSS `@media print` A4 paysage dédié | jsPDF ne gère ni la liaison des lettres arabes ni le RTL sans shaping manuel : le rendu serait cassé. L'impression navigateur donne un arabe parfait et une pagination fidèle. |
+| PDF (rendu de référence) | **Impression navigateur → Enregistrer en PDF**, CSS `@media print` A4 paysage | Vectoriel, texte sélectionnable, arabe parfaitement lié. Un mois = exactement une page. |
+| PDF (téléchargement direct) | **`src/export/pdf.js`** : la page est dessinée sur un `<canvas>` puis encapsulée dans un PDF écrit octet par octet (image JPEG `/DCTDecode`) | jsPDF ne fait pas le *shaping* arabe (lettres détachées et inversées). Le canvas laisse le navigateur composer l'arabe, et le PDF est produit sans aucune librairie. |
 | Graphiques | **SVG généré à la main** (pas de librairie) | Un seul graphe simple ; évite 300 Ko de dépendance. |
-| Import Excel | **CSV (UTF-8, `,` ou `;`) + collage direct depuis Excel (TSV)** | Couvre Excel sans embarquer SheetJS (~800 Ko). |
-| Polices | Amiri / Cairo embarquées dans `/assets/fonts` | Rendu arabe identique hors-ligne et à l'impression. |
+| Import Excel | **CSV (UTF-8, `,` `;` ou tabulation) + collage direct depuis Excel** | Couvre Excel sans embarquer SheetJS (~800 Ko). |
+| Polices | Pile système `Amiri, Cairo, Noto Naskh Arabic, Tahoma, serif` | Les fichiers de polices n'ont pas pu être récupérés (accès CDN bloqué) ; déposer les `.woff2` dans `assets/fonts/` et les déclarer en `@font-face` suffit à figer le rendu. |
 
 ---
 
@@ -32,35 +33,39 @@
 │   │   ├── theme.css              # variables : vert #0d3b2e, doré #c9a227, ivoire #faf6ec
 │   │   ├── app.css                # mise en page écran, RTL
 │   │   └── print.css              # @page A4 paysage, cadre décoratif, en-tête ministériel
-│   ├── fonts/                     # Amiri, Cairo (woff2)
-│   └── img/                       # armoiries / logo MEN
+│   └── img/icon.svg               # icône de l'application
 ├── src/
-│   ├── main.js                    # bootstrap + routeur
+│   ├── main.js                    # bootstrap : init base, routes, service worker
 │   ├── db/
-│   │   ├── db.js                  # déclaration Dexie + versions/migrations
-│   │   ├── repo.js                # CRUD (établissement, classes, élèves, registres)
+│   │   ├── idb.js                 # mini-couche IndexedDB (stores, index, transactions)
+│   │   ├── repo.js                # CRUD métier (établissement, classes, élèves, registres)
 │   │   └── backup.js              # export/import JSON complet
 │   ├── data/
 │   │   ├── calendar-2026-2027.js  # calendrier scolaire marocain préchargé (modifiable)
 │   │   ├── levels.js              # TCS, TCL, 1BAC SE, 1BAC LSH, 2BAC PC, 2BAC SVT
 │   │   └── defaults.js            # infos établissement préremplies
 │   ├── core/
-│   │   ├── schoolCalendar.js      # jours ouvrés, week-ends, fériés, anssaf ayam
-│   │   ├── attendance.js          # règles des états de cellule + comptages
+│   │   ├── schoolCalendar.js      # jours ouvrés, week-ends, congés, anssaf ayam
+│   │   ├── attendance.js          # états de cellule et poids des absences
 │   │   └── stats.js               # taux mensuels/annuels, alertes absentéisme
 │   ├── ui/
-│   │   ├── views/
-│   │   │   ├── setup.js           # configuration établissement
-│   │   │   ├── classes.js         # gestion des classes
-│   │   │   ├── students.js        # liste élèves + import CSV/collage
-│   │   │   ├── register.js        # ⭐ grille mensuelle (cœur)
-│   │   │   ├── dashboard.js       # statistiques annuelles + graphe
-│   │   │   ├── calendar.js        # édition des vacances/fériés
-│   │   │   └── backup.js          # sauvegarde / restauration
-│   │   └── components/            # topbar, modal, toast, table virtuelle
-│   └── utils/                     # arabic.js (chiffres/abréviations jours), csv.js, dom.js
-├── vendor/
-│   └── dexie.min.js
+│   │   ├── app.js                 # état partagé (settings, calendrier, classe/mois courants)
+│   │   ├── router.js              # routage par hash + barre de navigation
+│   │   ├── components/pickers.js  # sélecteurs classe / mois, écrans vides
+│   │   └── views/
+│   │       ├── register.js        # ⭐ grille mensuelle (cœur)
+│   │       ├── students.js        # liste élèves + import CSV / collage Excel
+│   │       ├── classes.js         # gestion des classes
+│   │       ├── dashboard.js       # statistiques annuelles + graphe SVG
+│   │       ├── calendar.js        # édition des vacances/fériés
+│   │       ├── setup.js           # configuration établissement
+│   │       └── backup.js          # sauvegarde / restauration
+│   ├── export/
+│   │   ├── print.js               # page imprimable A4 paysage
+│   │   └── pdf.js                 # PDF téléchargeable (canvas → PDF, sans librairie)
+│   └── utils/
+│       ├── dom.js                 # h(), toast, modale, téléchargement
+│       └── csv.js                 # lecture/écriture CSV et TSV
 └── docs/
     └── MODELE-DONNEES.md          # ce document
 ```
@@ -162,7 +167,8 @@ C'est la clé de la performance : 6 classes × 10 mois = 60 enregistrements, pas
   "anneeScolaire": "2026/2027",
   "debutAnnee": "2026-09-07",
   "finAnnee":   "2027-06-30",
-  "joursWeekend": [0, 6],
+  "joursWeekend": [0],
+  "joursDemiJournee": [6],
   "periodes": [
     { "id": "h01", "type": "vacances", "libelle": "عطلة الفترة البينية الأولى",
       "du": "2026-10-18", "au": "2026-10-25", "source": "estimation", "confirme": false },
@@ -176,7 +182,9 @@ C'est la clé de la performance : 6 classes × 10 mois = 60 enregistrements, pas
 }
 ```
 
+`joursWeekend` : jours chômés (dimanche par défaut). `joursDemiJournee` : jours ne portant qu'un seul نصف يوم (samedi par défaut).
 `type` ∈ `vacances` | `ferie` | `examen` | `autre` → détermine la couleur de la colonne grisée.
+Quand plusieurs périodes couvrent une même date, **la plus courte l'emporte** (le 1er janvier affiche « فاتح السنة الميلادية » plutôt que la vacance qui l'englobe). Une période l'emporte aussi sur le week-end, pour que le libellé de la vacance couvre toute la plage grisée comme sur le papier.
 Le `libelle` s'affiche **verticalement** dans la colonne, comme sur le registre papier.
 `confirme: false` = date estimée (fêtes religieuses mobiles, notes ministérielles non encore publiées) : l'app affiche un bandeau « à vérifier » et un bouton de correction en un clic.
 
@@ -185,8 +193,8 @@ Le `libelle` s'affiche **verticalement** dans la colonne, comme sur le registre 
 Pour chaque élève et chaque mois :
 
 ```
-anssafEtude   = 2 × (jours ouvrés du mois, hors week-ends/vacances/fériés,
-                     bornés par dateInscription / dateRadiation)
+anssafEtude   = Σ capacité des jours ouvrés du mois (2, ou 1 pour un jour à demi-journée),
+                hors week-ends/vacances/fériés, bornés par dateInscription / dateRadiation
 anssafAbsence = Σ (poids des cellules a/am/pm/aj)
 anssafPresence= anssafEtude − anssafAbsence
 tauxMensuel   = anssafPresence / anssafEtude × 100      (arrondi 2 décimales)

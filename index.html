@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سجل الحضور والغياب 2026/2027</title>
+<meta name="theme-color" content="#0d3b2e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/css/print.css" media="print">
+</head>
+<body>
+
+<header class="topbar no-print">
+  <div class="brand">
+    <span class="brand-mark">✦</span>
+    <div>
+      <strong>سجل الحضور والغياب</strong>
+      <small id="brand-sub">السنة الدراسية 2026/2027</small>
+    </div>
+  </div>
+  <nav id="nav" class="nav"></nav>
+</header>
+
+<main id="view" class="view"></main>
+
+<div id="toast" class="toast" hidden></div>
+<div id="modal" class="modal" hidden>
+  <div class="modal-box">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button id="modal-cancel" class="btn btn-ghost">إلغاء</button>
+      <button id="modal-ok" class="btn btn-primary">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<footer class="credits no-print">الأستاذ عمري محمد — 2026/2027</footer>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

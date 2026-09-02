@@ -1,0 +1,56 @@
+/* ================= Mise en page d'impression : A4 paysage, fidèle au registre officiel ================= */
+@page{ size:A4 landscape; margin:7mm; }
+
+@media print{
+  html,body{background:#fff !important;margin:0;padding:0}
+  .no-print,.topbar,.credits,#toast,#modal,.view{display:none !important}
+  #print-area{display:block !important}
+
+  .sheet{
+    page-break-after:always;break-after:page;
+    position:relative;
+    height:196mm;overflow:hidden;
+    padding:3.5mm 5mm;
+    border:2.4pt double #0d3b2e;
+    outline:.8pt solid #c9a227;outline-offset:2.2pt;
+    font-family:"Amiri","Cairo","Noto Naskh Arabic",serif;
+    color:#101a17;
+    direction:rtl;
+  }
+  .sheet:last-child{page-break-after:auto;break-after:auto}
+
+  .sheet-head{text-align:center;margin-bottom:1.2mm;line-height:1.28}
+  .sheet-head .kingdom{font-size:8.6pt;font-weight:700}
+  .sheet-head .ministry{font-size:7.8pt}
+  .sheet-head .title{
+    font-size:12pt;font-weight:700;color:#0d3b2e;margin:.8mm 0 .4mm;
+    border-block:1pt solid #c9a227;padding:.4mm 0;display:inline-block;padding-inline:12mm;
+  }
+  .sheet-meta{display:flex;justify-content:space-between;gap:3mm;font-size:7.6pt;margin-bottom:1mm;flex-wrap:wrap}
+  .sheet-meta span{white-space:nowrap}
+  .sheet-meta b{color:#0d3b2e}
+
+  table.sheet-grid{width:100%;border-collapse:collapse;table-layout:fixed;font-size:6.6pt}
+  table.sheet-grid thead{display:table-header-group}
+  table.sheet-grid th,table.sheet-grid td{border:.5pt solid #4a5b55;text-align:center;padding:0;height:3.3mm;line-height:1.05;overflow:hidden}
+  table.sheet-grid thead th{background:#e6efea;font-weight:700;font-size:6.2pt}
+  table.sheet-grid td.nom{text-align:right;padding-inline:1mm;font-size:7.2pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  table.sheet-grid th.rt,table.sheet-grid td.rt{width:7mm}
+  table.sheet-grid th.nom{width:46mm}
+  table.sheet-grid th.sum,table.sheet-grid td.sum{width:9mm;background:#f5f2e7;font-weight:700}
+  table.sheet-grid th.note,table.sheet-grid td.note{width:30mm;text-align:right;padding-inline:1mm;font-size:6.4pt}
+  table.sheet-grid td.off,table.sheet-grid th.off{background:#cfc8b6}
+  table.sheet-grid th.off .vlabel{
+    writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+    font-size:5pt;display:block;margin:0 auto;max-height:13.5mm;overflow:hidden;
+  }
+  table.sheet-grid thead tr.vac th{height:18mm;vertical-align:bottom;padding-bottom:.3mm}
+  table.sheet-grid td.a{color:#b3261e;font-weight:700}
+  table.sheet-grid td.aj{color:#8a6508;font-weight:700}
+  table.sheet-grid tfoot td{background:#e6efea;color:#0d3b2e;font-weight:700;font-size:7pt;height:5mm}
+
+  .sheet-foot{
+    display:flex;justify-content:space-between;font-size:6.8pt;margin-top:1.2mm;color:#31413b;
+  }
+  .sheet-foot .sig{text-align:center;min-width:45mm}
+}

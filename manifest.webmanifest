@@ -1,0 +1,21 @@
+{
+  "name": "سجل الحضور والغياب 2026/2027",
+  "short_name": "سجل الحضور",
+  "description": "تدبير حضور وغياب التلاميذ — الثانوية التأهيلية تيلمي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf6ec",
+  "theme_color": "#0d3b2e",
+  "icons": [
+    {
+      "src": "assets/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

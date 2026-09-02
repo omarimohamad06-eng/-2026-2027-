@@ -1,0 +1,185 @@
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+#print-area{display:none}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--police-ui);
+  background:var(--ivoire);
+  color:var(--texte);
+  font-size:15px;
+  line-height:1.55;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+h1,h2,h3{font-family:var(--police);margin:0 0 .4em}
+h1{font-size:1.5rem}h2{font-size:1.25rem}h3{font-size:1.05rem}
+a{color:var(--vert-clair)}
+
+/* ---------- Barre supérieure ---------- */
+.topbar{
+  background:linear-gradient(180deg,var(--vert) 0%,var(--vert-clair) 100%);
+  color:#fff;padding:.55rem 1rem;display:flex;gap:1rem;align-items:center;
+  flex-wrap:wrap;box-shadow:var(--ombre);position:sticky;top:0;z-index:40;
+}
+.brand{display:flex;gap:.6rem;align-items:center}
+.brand-mark{color:var(--dore);font-size:1.6rem;line-height:1}
+.brand strong{display:block;font-family:var(--police);font-size:1.1rem}
+.brand small{display:block;color:var(--dore-pale);font-size:.72rem}
+.nav{display:flex;gap:.25rem;flex-wrap:wrap;margin-inline-start:auto}
+.nav a{
+  color:#e9f2ee;text-decoration:none;padding:.35rem .7rem;border-radius:999px;
+  font-size:.85rem;border:1px solid transparent;white-space:nowrap;
+}
+.nav a:hover{background:rgba(255,255,255,.12)}
+.nav a.active{background:var(--dore);color:var(--vert);border-color:var(--dore);font-weight:700}
+
+.view{flex:1;padding:1rem;max-width:1600px;width:100%;margin:0 auto}
+.credits{text-align:center;color:var(--texte-doux);font-size:.75rem;padding:.8rem}
+
+/* ---------- Blocs ---------- */
+.card{
+  background:var(--papier);border:1px solid var(--bord);border-radius:var(--rayon);
+  padding:1rem;margin-bottom:1rem;box-shadow:var(--ombre);
+}
+.card-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.card-head h2{margin:0}
+.card-head .spacer{margin-inline-start:auto}
+.grid{display:grid;gap:.8rem}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.muted{color:var(--texte-doux)}
+.small{font-size:.8rem}
+.hint{background:var(--dore-pale);border:1px solid var(--dore);border-radius:8px;padding:.6rem .8rem;font-size:.85rem;margin-bottom:.8rem}
+.hint b{color:var(--vert)}
+
+/* ---------- Formulaires ---------- */
+label{display:block;font-size:.82rem;font-weight:600;margin-bottom:.25rem;color:var(--vert)}
+input,select,textarea{
+  width:100%;padding:.45rem .6rem;border:1px solid var(--bord);border-radius:8px;
+  font-family:inherit;font-size:.9rem;background:#fff;color:var(--texte);
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--vert-clair);outline-offset:-1px}
+textarea{min-height:80px;resize:vertical}
+.field{margin-bottom:.7rem}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
+
+/* ---------- Boutons ---------- */
+.btn{
+  font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;
+  padding:.45rem .9rem;border-radius:8px;border:1px solid var(--bord);
+  background:#fff;color:var(--vert);white-space:nowrap;
+}
+.btn:hover{background:var(--vert-pale)}
+.btn-primary{background:var(--vert);border-color:var(--vert);color:#fff}
+.btn-primary:hover{background:var(--vert-clair)}
+.btn-gold{background:var(--dore);border-color:var(--dore);color:var(--vert)}
+.btn-gold:hover{filter:brightness(1.07)}
+.btn-danger{color:var(--rouge);border-color:#e6c3c0}
+.btn-danger:hover{background:var(--rouge-pale)}
+.btn-ghost{background:transparent;border-color:transparent}
+.btn-sm{padding:.2rem .5rem;font-size:.78rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Tableaux génériques ---------- */
+table.data{width:100%;border-collapse:collapse;font-size:.87rem}
+table.data th,table.data td{border:1px solid var(--bord);padding:.35rem .5rem;text-align:right}
+table.data thead th{background:var(--vert);color:#fff;font-weight:600;position:sticky;top:0}
+table.data tbody tr:nth-child(even){background:#fbfaf5}
+table.data tbody tr:hover{background:var(--vert-pale)}
+
+/* ---------- Grille du registre ---------- */
+.register-wrap{overflow:auto;max-height:72vh;border:2px solid var(--vert);border-radius:6px;background:#fff}
+table.register{border-collapse:separate;border-spacing:0;font-size:.8rem;width:max-content;min-width:100%}
+table.register th,table.register td{
+  border-inline-start:1px solid var(--bord);border-block-end:1px solid var(--bord);
+  padding:0;text-align:center;white-space:nowrap;
+}
+table.register thead th{
+  background:var(--vert);color:#fff;position:sticky;top:0;z-index:20;
+  font-weight:600;padding:.2rem .25rem;
+}
+table.register thead tr:nth-child(2) th{top:24px}
+th.col-rt,td.col-rt{position:sticky;inset-inline-start:0;z-index:25;background:var(--vert-pale);width:38px;min-width:38px}
+th.col-nom,td.col-nom{position:sticky;inset-inline-start:38px;z-index:25;background:var(--vert-pale);
+  min-width:190px;max-width:190px;text-align:start;padding:.15rem .4rem;
+  font-family:var(--police);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;
+  border-inline-end:2px solid var(--vert);
+}
+thead th.col-rt,thead th.col-nom{background:var(--vert);color:#fff;z-index:30}
+td.col-nom{cursor:default}
+.register tbody tr:nth-child(even) td.col-rt,.register tbody tr:nth-child(even) td.col-nom{background:#dfeae4}
+
+th.day{width:26px;min-width:26px;font-size:.72rem}
+th.day .dnum{display:block;font-weight:700}
+th.day .dab{display:block;font-size:.62rem;opacity:.85}
+th.day.off{background:var(--grise);color:#4a463c}
+th.day.today{background:var(--dore);color:var(--vert)}
+
+td.cell{width:26px;min-width:26px;height:24px;cursor:pointer;user-select:none;font-size:.8rem;font-weight:700}
+td.cell:hover{outline:2px solid var(--dore);outline-offset:-2px}
+td.cell.off{background:var(--grise);cursor:not-allowed}
+td.cell.off:hover{outline:none}
+td.cell.s-a{background:var(--rouge-pale);color:var(--rouge)}
+td.cell.s-am{background:linear-gradient(to bottom,var(--rouge-pale) 50%,#fff 50%);color:var(--rouge)}
+td.cell.s-pm{background:linear-gradient(to bottom,#fff 50%,var(--rouge-pale) 50%);color:var(--rouge)}
+td.cell.s-aj{background:var(--ambre-pale);color:var(--ambre)}
+td.cell.s-r{background:var(--dore-pale);color:var(--ambre)}
+td.cell.s-p{background:#e7f4ec;color:var(--vert-clair)}
+td.cell.out{background:repeating-linear-gradient(45deg,#f2efe6,#f2efe6 4px,#e8e3d5 4px,#e8e3d5 8px);cursor:not-allowed}
+
+/* colonne de congé : libellé vertical */
+th.day.off .vlabel{
+  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  font-size:.6rem;max-height:80px;overflow:hidden;display:block;margin:2px auto 0;
+  font-family:var(--police);
+}
+.register thead tr.vac th{height:92px;vertical-align:bottom;background:var(--vert)}
+
+td.sum{background:#f5f2e7;font-weight:700;min-width:44px;width:44px}
+td.sum.taux{color:var(--vert);background:var(--dore-pale)}
+td.sum.bad{color:var(--rouge)}
+th.sum{background:var(--vert-clair);min-width:44px;width:44px;font-size:.68rem;white-space:normal;line-height:1.1;padding:.15rem}
+td.note,th.note{min-width:150px;max-width:150px;text-align:start}
+td.note input{border:none;background:transparent;font-size:.78rem;padding:.1rem .3rem}
+td.note input:focus{background:#fff;outline:1px solid var(--dore)}
+tfoot td{background:var(--vert);color:#fff;font-weight:700;font-size:.8rem;padding:.25rem}
+tfoot td.taux-global{background:var(--dore);color:var(--vert)}
+
+/* ---------- Palette de saisie ---------- */
+.brush{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
+.brush button{
+  border:1px solid var(--bord);background:#fff;border-radius:8px;padding:.3rem .6rem;
+  font-size:.8rem;cursor:pointer;font-family:inherit;display:flex;gap:.3rem;align-items:center;
+}
+.brush button.on{border-color:var(--vert);background:var(--vert);color:#fff;font-weight:700}
+.chip{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+
+/* ---------- Statistiques ---------- */
+.stat{background:#fff;border:1px solid var(--bord);border-radius:var(--rayon);padding:.8rem;text-align:center}
+.stat .v{font-size:1.6rem;font-weight:800;color:var(--vert);font-family:var(--police)}
+.stat .l{font-size:.78rem;color:var(--texte-doux)}
+.badge{display:inline-block;padding:.1rem .45rem;border-radius:999px;font-size:.72rem;font-weight:700}
+.badge.ok{background:#e7f4ec;color:var(--vert-clair)}
+.badge.warn{background:var(--ambre-pale);color:var(--ambre)}
+.badge.bad{background:var(--rouge-pale);color:var(--rouge)}
+.bar{height:8px;background:var(--vert-pale);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--vert-clair)}
+
+/* ---------- Toast & modale ---------- */
+.toast{
+  position:fixed;bottom:1rem;inset-inline-start:1rem;background:var(--vert);color:#fff;
+  padding:.6rem 1rem;border-radius:8px;box-shadow:var(--ombre);z-index:90;font-size:.85rem;
+}
+.toast.err{background:var(--rouge)}
+.modal{position:fixed;inset:0;background:rgba(13,59,46,.45);display:flex;align-items:center;justify-content:center;z-index:80;padding:1rem}
+.modal-box{background:#fff;border-radius:var(--rayon);padding:1rem;max-width:520px;width:100%;box-shadow:var(--ombre);max-height:85vh;overflow:auto}
+.modal-actions{display:flex;gap:.5rem;justify-content:flex-start;margin-top:.9rem}
+
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--texte-doux)}
+.empty .big{font-size:2.4rem;color:var(--dore)}
+
+@media (max-width:640px){
+  .view{padding:.6rem}
+  .nav a{font-size:.78rem;padding:.3rem .55rem}
+  th.col-nom,td.col-nom{min-width:130px;max-width:130px}
+}
