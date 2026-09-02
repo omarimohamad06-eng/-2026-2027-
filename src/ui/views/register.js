@@ -32,16 +32,14 @@ export async function renderRegister() {
     h('div.row', {},
       h('div', { style: { flex: '1 1 220px' } }, classSelect(() => renderCurrent())),
       h('div', { style: { flex: '1 1 160px' } }, moisSelect(() => renderCurrent())),
-      h('span.spacer', { style: { marginInlineStart: 'auto' } }),
-      h('button.btn', { onclick: () => imprimerMois({ settings: app.settings, cls, cal, mois: app.mois, students, reg }) }, '🖨 طباعة'),
-      ' ',
-      h('button.btn.btn-gold', { onclick: async () => {
-        toast('جارٍ إنشاء ملف PDF…');
-        try { await telechargerPdfMois({ settings: app.settings, cls, cal, mois: [app.mois], students, regs: { [app.mois]: reg } }); }
-        catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
-      } }, '⬇ PDF'),
-      ' ',
-      h('button.btn', { onclick: () => exporterCSV(cal, cls, app.mois, students, reg) }, '⬇ CSV'),
+      h('div.actions', {},
+        h('button.btn', { onclick: () => imprimerMois({ settings: app.settings, cls, cal, mois: app.mois, students, reg }) }, '🖨 طباعة'),
+        h('button.btn.btn-gold', { onclick: async () => {
+          toast('جارٍ إنشاء ملف PDF…');
+          try { await telechargerPdfMois({ settings: app.settings, cls, cal, mois: [app.mois], students, regs: { [app.mois]: reg } }); }
+          catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
+        } }, '⬇ PDF'),
+        h('button.btn', { onclick: () => exporterCSV(cal, cls, app.mois, students, reg) }, '⬇ CSV')),
     ));
 
   /* ------- palette de saisie ------- */

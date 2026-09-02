@@ -99,7 +99,7 @@ export async function renderStudents() {
         h('button.btn.btn-primary', { onclick: ajouter }, '+ إضافة'));
     })();
 
-    const table = students.length ? h('table.data', {},
+    const table = students.length ? h('div.table-wrap', {}, h('table.data', {},
       h('thead', {}, h('tr', {},
         h('th', { style: { width: '48px' } }, 'ر.ت'),
         h('th', {}, 'الاسم والنسب'),
@@ -135,7 +135,7 @@ export async function renderStudents() {
             toast('تم الحذف');
             dessine();
           },
-        }, 'حذف')))))
+        }, 'حذف'))))))
     ) : h('div.empty', {}, h('div.big', {}, '👥'), h('p.muted', {}, 'لا يوجد تلميذ في هذا القسم.'));
 
     corps.append(

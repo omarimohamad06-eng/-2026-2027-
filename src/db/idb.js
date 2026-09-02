@@ -40,14 +40,24 @@ export function openDB() {
   return dbPromise;
 }
 
+/**
+ * Une lecture se résout dès que la requête aboutit ; une écriture attend la
+ * validation de la transaction, pour ne jamais annoncer un enregistrement
+ * qu'un abandon ultérieur (quota dépassé, onglet fermé) aurait annulé.
+ */
 function run(storeName, mode, fn) {
   return openDB().then(db => new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, mode);
     const req = fn(tx.objectStore(storeName));
+    let valeur;
     tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-    if (req) { req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); }
-    else tx.oncomplete = () => resolve();
+    tx.onabort = () => reject(tx.error || new Error('transaction annulée'));
+    if (req) {
+      req.onerror = () => reject(req.error);
+      if (mode === 'readonly') req.onsuccess = () => resolve(req.result);
+      else req.onsuccess = () => { valeur = req.result; };
+    }
+    if (mode !== 'readonly' || !req) tx.oncomplete = () => resolve(valeur);
   }));
 }
 

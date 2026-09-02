@@ -3,7 +3,7 @@ import { h, clear, download, toast } from '../../utils/dom.js';
 import * as repo from '../../db/repo.js';
 import { app } from '../app.js';
 import { classSelect, emptyState } from '../components/pickers.js';
-import { statsAnnee } from '../../core/stats.js';
+import { statsAnnee, statsMois } from '../../core/stats.js';
 import { moisLabel } from '../../core/schoolCalendar.js';
 import { MOIS_SCOLAIRES } from '../../data/calendar-2026-2027.js';
 import { toCSV } from '../../utils/csv.js';
@@ -85,7 +85,7 @@ export async function renderDashboard() {
       h('div.stat', {}, h('div.v', {}, String(st.global.enAlerte)), h('div.l', {}, `تلاميذ دون ${app.settings.seuilTauxFaible}%`)),
     );
 
-    const tableau = students.length ? h('table.data', {},
+    const tableau = students.length ? h('div.table-wrap', {}, h('table.data', {},
       h('thead', {}, h('tr', {},
         h('th', { style: { width: '46px' } }, 'ر.ت'),
         h('th', {}, 'الاسم والنسب'),
@@ -103,22 +103,25 @@ export async function renderDashboard() {
         h('td', {}, String(e.justifiee)),
         h('td', {}, String(e.retards)),
         h('td', {}, e.etude ? badgeTaux(e.taux) : '—'),
-        h('td', {}, h('div.bar', {}, h('i', { style: { width: Math.max(0, Math.min(100, e.taux)) + '%' } }))))))
+        h('td', {}, h('div.bar', {}, h('i', { style: { width: Math.max(0, Math.min(100, e.taux)) + '%' } })))))))
     ) : h('div.empty', {}, h('p.muted', {}, 'لا يوجد تلاميذ في هذا القسم.'));
 
     const exportAnnuel = () => {
-      const entete = ['ر.ت', 'الاسم والنسب', ...MOIS_SCOLAIRES.map(m => moisLabel(m) + ' (غياب)'),
+      // Absences mensuelles exprimées en أنصاف الأيام, comme les totaux annuels.
+      const absencesParMois = Object.fromEntries(MOIS_SCOLAIRES.map(m => [
+        m, new Map(statsMois(app.calendar, m, students, regs[m], app.settings)
+          .rows.map(r => [r.student.id, r.absence])),
+      ]));
+      const entete = ['ر.ت', 'الاسم والنسب',
+        ...MOIS_SCOLAIRES.map(m => `${moisLabel(m)} (أنصاف أيام الغياب)`),
         'مجموع أنصاف أيام الدراسة', 'مجموع الغياب', 'منه مبرر', 'التأخرات', 'نسبة المواظبة %'];
       const lignes = st.eleves
         .slice().sort((a, b) => a.student.rt - b.student.rt)
-        .map(e => {
-          const parMois = MOIS_SCOLAIRES.map(m => {
-            const cells = regs[m]?.cells?.[e.student.id] || {};
-            return Object.values(cells).filter(c => c && c !== 'r').length;
-          });
-          return [e.student.rt, e.student.nom, ...parMois, e.etude, e.absence, e.justifiee, e.retards,
-            e.etude ? e.taux.toFixed(2) : ''];
-        });
+        .map(e => [
+          e.student.rt, e.student.nom,
+          ...MOIS_SCOLAIRES.map(m => absencesParMois[m].get(e.student.id) ?? 0),
+          e.etude, e.absence, e.justifiee, e.retards, e.etude ? e.taux.toFixed(2) : '',
+        ]);
       download(`حصيلة-سنوية-${cls.nom}.csv`, toCSV([entete, ...lignes]), 'text/csv');
     };
 
@@ -127,20 +130,21 @@ export async function renderDashboard() {
         h('div.card-head', {},
           h('h2', {}, `الحصيلة السنوية — ${cls.nom}`),
           h('span.spacer'),
-          h('button.btn', { onclick: exportAnnuel }, '⬇ CSV سنوي'), ' ',
-          h('button.btn', {
-            onclick: () => imprimerPlusieursMois({
-              settings: app.settings, cls, cal: app.calendar, moisListe: MOIS_SCOLAIRES, students, regs }),
-          }, '🖨 طباعة كل الأشهر'), ' ',
-          h('button.btn.btn-gold', {
-            onclick: async () => {
-              toast('جارٍ إنشاء ملف PDF للسنة كاملة…');
-              try {
-                await telechargerPdfMois({ settings: app.settings, cls, cal: app.calendar,
-                  mois: MOIS_SCOLAIRES, students, regs });
-              } catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
-            },
-          }, '⬇ PDF السنة')),
+          h('div.actions', {},
+            h('button.btn', { onclick: exportAnnuel }, '⬇ CSV سنوي'),
+            h('button.btn', {
+              onclick: () => imprimerPlusieursMois({
+                settings: app.settings, cls, cal: app.calendar, moisListe: MOIS_SCOLAIRES, students, regs }),
+            }, '🖨 طباعة كل الأشهر'),
+            h('button.btn.btn-gold', {
+              onclick: async () => {
+                toast('جارٍ إنشاء ملف PDF للسنة كاملة…');
+                try {
+                  await telechargerPdfMois({ settings: app.settings, cls, cal: app.calendar,
+                    mois: MOIS_SCOLAIRES, students, regs });
+                } catch (e) { console.error(e); toast('تعذر إنشاء PDF: ' + e.message, 'err'); }
+              },
+            }, '⬇ PDF السنة'))),
         tuiles),
       h('div.card', {}, h('div.card-head', {}, h('h2', {}, 'تطور نسبة المواظبة')), graphique(st.parMois)),
       h('div.card', {},

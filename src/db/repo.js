@@ -58,10 +58,16 @@ export async function listStudents(classId) {
   return rows.sort((a, b) => (a.rt ?? 0) - (b.rt ?? 0));
 }
 
+/** Prochain رقم ترتيب libre : max + 1, pour éviter les doublons après suppression. */
+async function prochainRt(classId) {
+  const rows = await listStudents(classId);
+  return rows.reduce((m, s) => Math.max(m, Number(s.rt) || 0), 0) + 1;
+}
+
 export async function saveStudent(st) {
   const s = { ...st };
   if (!s.id) s.id = uid('std');
-  if (!s.rt) s.rt = (await listStudents(s.classId)).length + 1;
+  if (!s.rt) s.rt = await prochainRt(s.classId);
   s.rt = Number(s.rt);
   s.actif = s.actif !== false;
   await idb.put('students', s);
@@ -70,8 +76,7 @@ export async function saveStudent(st) {
 
 /** Ajout en lot (saisie multiligne, import CSV, collage Excel). */
 export async function addStudents(classId, list) {
-  const existants = await listStudents(classId);
-  let rt = existants.length;
+  let rt = (await prochainRt(classId)) - 1;
   const rows = list.map(x => ({
     id: uid('std'), classId, rt: ++rt,
     nom: x.nom, codeMassar: x.codeMassar || '', sexe: x.sexe || '',

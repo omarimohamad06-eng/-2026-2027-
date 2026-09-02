@@ -66,7 +66,7 @@ export async function renderClasses() {
       h('span.spacer'),
       h('span.muted.small', {}, `${app.classes.length} قسم`)),
     app.classes.length
-      ? h('table.data', {},
+      ? h('div.table-wrap', {}, h('table.data', {},
           h('thead', {}, h('tr', {},
             h('th', {}, 'المستوى'), h('th', {}, 'القسم'), h('th', {}, 'الفوج'),
             h('th', {}, 'المادة'), h('th', {}, 'التلاميذ'), h('th', {}, ''))),
@@ -96,7 +96,7 @@ export async function renderClasses() {
                   toast('تم حذف القسم');
                   renderCurrent();
                 },
-              }, 'حذف')))))
+              }, 'حذف'))))))
         )
       : h('div.empty', {}, h('div.big', {}, '🏫'), h('p.muted', {}, 'لا يوجد أي قسم بعد. أضف قسمك الأول أسفله.')));
 

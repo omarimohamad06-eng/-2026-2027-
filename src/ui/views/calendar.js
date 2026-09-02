@@ -74,7 +74,7 @@ export async function renderCalendar() {
   const dessineListe = () => {
     clear(listeZone);
     const tri = [...cal.periodes].sort((a, b) => a.du.localeCompare(b.du));
-    listeZone.append(h('table.data', {},
+    listeZone.append(h('div.table-wrap', {}, h('table.data', {},
       h('thead', {}, h('tr', {},
         h('th', {}, 'التسمية'),
         h('th', { style: { width: '140px' } }, 'النوع'),
@@ -104,7 +104,7 @@ export async function renderCalendar() {
             await sauver('تم الحذف');
             dessineListe();
           },
-        }, '✕')))))));
+        }, '✕'))))))));
   };
   dessineListe();
 

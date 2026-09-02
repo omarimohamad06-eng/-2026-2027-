@@ -162,7 +162,19 @@ Le modèle de données (settings / classes / students / registers / calendar) es
 
 ---
 
-## 9. Compatibilité
+## 9. Sur tablette et téléphone
+
+L'interface s'adapte : la barre de navigation passe sur deux lignes, les sélecteurs et
+les boutons s'empilent, et les tableaux larges (élèves, statistiques, rzenama) défilent
+**horizontalement dans leur propre cadre** — la page, elle, ne se décale jamais.
+
+Dans la grille mensuelle, les colonnes **ر.ت** et **الاسم والنسب** restent figées à droite
+pendant que les jours défilent : le pointage reste possible d'une main sur tablette.
+La saisie confortable d'une classe entière reste néanmoins plus rapide sur ordinateur.
+
+---
+
+## 10. Compatibilité
 
 Navigateurs récents pour ordinateur et tablette : Chrome/Edge 100+, Firefox 100+, Safari 16+.
 La navigation privée empêche le stockage local : utilisez une fenêtre normale.

@@ -62,6 +62,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vert-clair);outl
 textarea{min-height:80px;resize:vertical}
 .field{margin-bottom:.7rem}
 .row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
+.actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-inline-start:auto}
 
 /* ---------- Boutons ---------- */
 .btn{
@@ -81,6 +82,10 @@ textarea{min-height:80px;resize:vertical}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 
 /* ---------- Tableaux génériques ---------- */
+/* Les tableaux larges défilent dans leur propre conteneur : la page, elle,
+   ne défile jamais horizontalement (indispensable sur mobile). */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-wrap>table.data{min-width:520px}
 table.data{width:100%;border-collapse:collapse;font-size:.87rem}
 table.data th,table.data td{border:1px solid var(--bord);padding:.35rem .5rem;text-align:right}
 table.data thead th{background:var(--vert);color:#fff;font-weight:600;position:sticky;top:0}
@@ -180,6 +185,9 @@ tfoot td.taux-global{background:var(--dore);color:var(--vert)}
 
 @media (max-width:640px){
   .view{padding:.6rem}
+  .card{padding:.7rem}
+  .card-head h2{font-size:1.05rem}
+  .row>.actions{width:100%}
   .nav a{font-size:.78rem;padding:.3rem .55rem}
   th.col-nom,td.col-nom{min-width:130px;max-width:130px}
 }
