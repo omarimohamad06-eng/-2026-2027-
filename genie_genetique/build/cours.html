@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>2BAC SVT – Unité II – Chapitre 3 : Le génie génétique</title>
+<link rel="stylesheet" href="style.css">
+<script>
+  // ?v=prof → version professeur (réponses visibles) ; sinon version élève
+  if (new URLSearchParams(location.search).get('v') === 'prof') document.documentElement.classList.add('prof-mode');
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.documentElement.classList.contains('prof-mode')) {
+      document.body.classList.add('prof');
+      // Version professeur : Activité 2 – Document 1 est réparti en deux cadres (entre les parties 2 et 3)
+      const s3 = document.getElementById('a2d1-3'), f = s3.parentElement;
+      const nf = document.createElement('div'); nf.className = 'frame';
+      nf.innerHTML = '<div class="dochead"><b>Document 1 (suite):</b>Isolement du gène d’intérêt</div>';
+      let n = s3; while (n) { const nx = n.nextElementSibling; nf.append(n); n = nx; }
+      f.after(nf);
+    }
+    // Pas de titre orphelin : chaque sous-titre / en-tête de document reste collé au bloc qui le suit
+    const glue = sel => document.querySelectorAll(sel).forEach(t => {
+      if (t.parentElement.classList.contains('keep')) return;
+      const group = [t]; let n = t.nextElementSibling;
+      // le titre emporte les paragraphes qui le suivent ; s'il n'y en a pas, le bloc suivant
+      while (n && n.tagName === 'P') { group.push(n); n = n.nextElementSibling; }
+      if (group.length === 1 && n) group.push(n);
+      const w = document.createElement('div'); w.className = 'keep';
+      t.before(w); w.append(...group);
+    });
+    glue('.sub'); glue('.dochead');
+    // barre « Activité » + introduction + titre de partie + début du premier document
+    document.querySelectorAll('.bar.act').forEach(t => {
+      const g = [t]; let n = t.nextElementSibling;
+      while (n && (n.classList.contains('intro') || n.classList.contains('part'))) { g.push(n); n = n.nextElementSibling; }
+      const w = document.createElement('div'); w.className = 'keep'; t.before(w); w.append(...g);
+    });
+  });
+</script>
+</head>
+<body>
+
+<!-- ================================================================ CHAPITRE -->
+<div class="bar chap"><span class="lbl">Chapitre</span><span class="num">3</span><span class="ttl">Le génie génétique : principes et techniques</span></div>
+
+<!-- ================================================================ SITUATION DE DÉPART -->
+<div class="frame">
+  <div class="banner">Situation de départ</div>
+  <p>Le <span class="hl">génie génétique</span> constitue l’une des principales avancées scientifiques du XX<sup>e</sup> siècle en génétique et en biologie moléculaire. Il désigne un ensemble de techniques utilisées pour manipuler les gènes des organismes vivants. Ces techniques permettent aux scientifiques d’améliorer ou de modifier les caractéristiques d’un organisme. Les domaines d’application du génie génétique sont très variés : l’agronomie, la santé, l’industrie et même la recherche scientifique.</p>
+  <div class="row" style="margin-top:2mm">
+    <figure style="flex:360"><img src="../images/doc01_insuline.png" style="height:52mm;width:auto"><figcaption><b>Doc 1 :</b> en 1982, les États-Unis ont officiellement autorisé le premier médicament produit par génie génétique : l’insuline humaine.</figcaption></figure>
+    <figure style="flex:431"><img src="../images/doc02_riz_dore.png" style="height:52mm;width:auto"><figcaption><b>Doc 2 :</b> le riz doré est une variété de riz génétiquement modifiée pour produire du bêta-carotène, un précurseur de la vitamine A. Il a été développé pour lutter contre la carence en vitamine A.</figcaption></figure>
+    <figure style="flex:336"><img src="../images/doc03_tomates.png" style="height:52mm;width:auto"><figcaption><b>Doc 3 :</b> des tomates violettes génétiquement modifiées, riches en antioxydants, pourraient atténuer les effets de certaines maladies chroniques.</figcaption></figure>
+  </div>
+  <p class="txt" style="margin-top:1mm">En 2016, la surface mondiale des cultures d’OGM a atteint 185,1 millions d’hectares selon l’ISAAA (Service international pour l’acquisition d’applications agricoles biotechnologiques), organisme international de promotion des OGM.</p>
+  <div class="row">
+    <figure style="flex:1"><img src="../images/doc04_graphe_ogm.png" style="height:64mm;width:auto"><figcaption><b>Doc 4 :</b> évolution des surfaces cultivées en OGM dans le monde pour le soja, le maïs, le coton et le colza entre 1996 et 2016.</figcaption></figure>
+    <figure style="flex:1"><img src="../images/doc05_mais_mon810.png" style="height:64mm;width:auto"><figcaption><b>Doc 5 :</b> maïs génétiquement modifié (à gauche) résistant aux insectes, contrairement au maïs traditionnel (à droite).</figcaption></figure>
+  </div>
+</div>
+<div class="q"><div class="qb" style="text-align:center"><span class="hl">Question :</span> À partir de l’exploitation des données de la situation, <span class="v">formuler</span> les problèmes scientifiques de ce chapitre.</div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <ul>
+    <li>Quels sont les principes et les techniques du génie génétique ?</li>
+    <li>Comment le génie génétique permet-il la production d’organismes génétiquement modifiés (OGM) ?</li>
+    <li>Quels sont les domaines d’application du génie génétique ?</li>
+    <li>Quels sont les avantages et les inconvénients des organismes génétiquement modifiés ?</li>
+  </ul>
+</div>
+
+<!-- ================================================================ ACTIVITÉ 1 -->
+<div class="pagebreak"></div>
+<div class="bar act"><span class="lbl">Activité</span><span class="num">1</span><span class="ttl">Transfert naturel de gènes d’une bactérie à des cellules végétales</span></div>
+<div class="intro">
+  <p>Dans la nature, les micro-organismes sont en permanence en contact avec la faune et la flore. Dans le sol, ils peuvent infecter les végétaux et échanger du matériel génétique avec eux. Ces végétaux deviennent alors génétiquement modifiés et acquièrent de nouvelles caractéristiques génétiques.</p>
+  <p class="pb">Quelles conséquences ce transfert de matériel génétique peut-il avoir sur les plantes ?</p>
+</div>
+<div class="part"><span class="pl">A</span>La modification génétique naturelle</div>
+<div class="frame">
+  <div class="dochead"><b>Document 1:</b>La galle du collet : une modification génétique naturelle</div>
+  <div class="row">
+    <div class="col txt" style="flex:1.5"><p>La galle du collet est une maladie des plantes causée par la bactérie <i>Agrobacterium tumefaciens</i> (At), qui entraîne la formation d’une <span class="hl">tumeur</span> au site d’infection. Cette bactérie est attirée par les substances chimiques libérées par les plantes blessées. Au niveau de la blessure, At peut se fixer aux cellules de la plante. À la suite de ce contact, ces cellules végétales se multiplient considérablement, donnant naissance à une tumeur. Celle-ci est généralement localisée au collet (zone de transition entre la tige et la racine), d’où le nom de cette formation : galle du collet.</p></div>
+    <figure style="flex:.9"><img src="../images/doc06_fig1_colonie_at.png" style="height:41mm;width:auto"><figcaption><b>Fig 1 :</b> colonie d’At.</figcaption></figure>
+    <figure style="flex:.9"><img src="../images/doc07_fig2_galle.png" style="height:41mm;width:auto"><figcaption><b>Fig 2 :</b> galle du collet.</figcaption></figure>
+  </div>
+  <div class="row">
+    <div class="col" style="flex:.6"><p class="txt">Les cellules de la galle libèrent dans l’environnement des composés chimiques spécifiques : <span class="hl">les opines</span>. Les bactéries <i>Agrobacterium</i> présentes dans le sol, à proximité de la galle, sont capables de se multiplier grâce aux opines.</p></div>
+    <figure style="flex:1"><img src="../images/doc08_fig3_schema.png" style="width:100%"><figcaption><b>Fig 3 :</b> schéma de la transgenèse naturelle.</figcaption></figure>
+  </div>
+  <div class="row">
+    <div style="flex:1.05" class="col">
+      <p class="txt">Les bactéries At possèdent, en plus de l’ADN contenu dans le chromosome bactérien (de grande taille), de petites molécules d’ADN de forme circulaire appelées <span class="hl">plasmides</span>.</p>
+      <figure><img src="../images/doc09_fig4_plasmides.png" style="width:100%"><figcaption><b>Fig 4 :</b> <b class="bl">a.</b> schéma montrant le chromosome bactérien et les plasmides ; <b class="bl">b.</b> plasmide vu au microscope électronique.</figcaption></figure>
+    </div>
+    <figure style="flex:.66"><img src="../images/doc10_fig5_inoculation.png" style="width:100%"><figcaption><b>Fig 5 :</b> résultats de l’inoculation d’une plante saine avec des At privées de plasmides (à gauche) et avec des At normales (à droite). La culture des At à +37 °C leur fait perdre le plasmide Ti.</figcaption></figure>
+  </div>
+</div>
+<div class="q"><span class="ql">Questions:</span><div class="qb"><ol>
+  <li>À partir des figures 1, 2 et 3, <span class="v">décrire</span> les aspects morphologiques et cellulaires de la galle du collet.</li>
+  <li>En exploitant la figure 4 (a et b) et les résultats de l’expérience de la figure 5, <span class="v">déterminer</span> l’agent responsable de la formation de la tumeur.</li>
+</ol></div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <p><b>1.</b> La galle du collet est une maladie des plantes causée par la bactérie <i>Agrobacterium tumefaciens</i> (At). Elle se manifeste par la formation d’une tumeur (galle) au niveau du collet (zone entre les racines et la tige). Elle se forme à la suite d’une blessure ou d’un stress subi par la plante (porte d’entrée de la bactérie, attirée par les composés phénoliques libérés par la blessure). À l’échelle cellulaire, la galle résulte d’une prolifération cellulaire anormale (divisions incontrôlées), d’où sa croissance progressive ; ses cellules libèrent des opines.</p>
+  <p><b>2.</b> Les At privées de plasmides ne provoquent pas de galle, alors que les At normales en provoquent : l’agent responsable de la tumeur est donc le <b>plasmide Ti</b> (<i>Tumor-inducing</i>). L’infection commence par le transfert d’un fragment d’ADN (ADN-T) du plasmide Ti de la bactérie vers le génome des cellules végétales, où il s’intègre à l’ADN nucléaire. Cet ADN contient des gènes qui :</p>
+  <ul>
+    <li>provoquent une production excessive d’auxine (et de cytokinines) par les cellules végétales ; cet excès stimule les divisions cellulaires et un développement anormal des tissus, ce qui conduit à la formation de la galle du collet ;</li>
+    <li>provoquent la synthèse d’opines, des composés azotés utilisés exclusivement par la bactérie.</li>
+  </ul>
+</div>
+
+<div class="pb-eleve"></div>
+<div class="part"><span class="pl">B</span>Le mécanisme de la modification génétique naturelle</div>
+<div class="frame">
+  <div class="dochead"><b>Document 2:</b>Carte génétique du plasmide Ti et mécanisme de la modification génétique naturelle</div>
+  <div class="row">
+    <figure style="flex:1.2"><img src="../images/doc11_fig1_plasmide_ti.png" style="width:100%"><figcaption><b>Fig 1 :</b> carte génétique du plasmide Ti (<i>Tumor-inducing</i>).</figcaption></figure>
+    <div class="col txt" style="flex:.95">
+      <ul class="dash">
+        <li><span class="hl">OPS :</span> gènes codant l’enzyme opine synthétase, qui catalyse la synthèse des opines.</li>
+        <li><span class="hl">ONC (oncogènes) :</span> gènes codant les enzymes de synthèse des facteurs de croissance (auxines et cytokinines), responsables de la multiplication anarchique des cellules végétales et du développement de la tumeur.</li>
+        <li style="list-style:none;text-align:center"><span class="box" style="display:inline-block;padding:.5mm 3mm">ADN-T = gènes OPS + gènes ONC</span></li>
+        <li><span class="hl">Vir (virulence) :</span> gènes responsables du transfert de l’ADN-T vers le génome des cellules végétales.</li>
+        <li><span class="hl">OCC :</span> région de catabolisme (dégradation) des opines.</li>
+        <li><span class="hl">ORI :</span> origine de réplication ; elle permet au plasmide de se multiplier dans la bactérie.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="txt">At possède un plasmide appelé plasmide Ti. Lorsqu’une blessure se produit au collet d’une plante, la bactérie entre en contact avec une cellule végétale et y transfère un fragment du plasmide Ti (l’ADN-T). Cet ADN-T s’intègre à l’ADN de la cellule végétale. Les gènes portés par l’ADN-T s’expriment alors dans la cellule et conduisent à la synthèse, par les cellules tumorales, de deux types de substances : <span class="hl">l’auxine</span> (et les cytokinines), hormones de croissance dont la surproduction entraîne une multiplication incontrôlée des cellules végétales, et <span class="hl">les opines</span>, une source de nutriments pour At. La bactérie utilise les opines comme source de carbone, d’azote et d’énergie pour sa croissance et sa multiplication.</p>
+  <figure><img src="../images/doc12_fig2_transfert.png" class="small-prof" style="width:184mm"><figcaption><b>Fig 2 :</b> transfert d’un fragment d’ADN (ADN-T) d’At dans le génome de la cellule végétale.</figcaption></figure>
+</div>
+<div class="q"><span class="ql">Question:</span><div class="qb">En exploitant les figures 1 et 2, <span class="v">décrire</span> le mécanisme de la modification génétique naturelle dans le cas de la galle du collet.</div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <ul>
+    <li><i>Agrobacterium tumefaciens</i> est une bactérie du sol. Attirée par les composés phénoliques libérés par les cellules végétales blessées, elle pénètre dans la plante par une blessure.</li>
+    <li>La bactérie contient un plasmide particulier, le <b>plasmide Ti</b> (<i>Tumor-inducing</i>), qui porte une région spéciale : l’<b>ADN-T</b> (ADN transféré). Quand la bactérie détecte une blessure, elle active les <b>gènes vir</b> (virulence), qui déclenchent le transfert de l’ADN-T : celui-ci est découpé puis transféré de la bactérie à la cellule végétale.</li>
+    <li>L’ADN-T pénètre dans le noyau de la cellule végétale et s’intègre de façon stable au génome de la plante.</li>
+    <li>L’ADN-T contient deux types de gènes :
+      <ul>
+        <li><b>gènes oncogènes (ONC)</b> : ils codent des enzymes qui induisent la synthèse d’auxines et de cytokinines (hormones végétales). Résultat : les cellules végétales se divisent de façon incontrôlée → formation de la galle (tumeur) ;</li>
+        <li><b>gènes de biosynthèse des opines (OPS)</b> : ils forcent la plante à produire des opines, composés azotés spécifiques inutiles à la plante, mais qui servent de nutriments exclusifs à la bactérie.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<!-- ================================================================ ACTIVITÉ 2 -->
+<div class="pagebreak eleve-only-break"></div>
+<div class="bar act"><span class="lbl">Activité</span><span class="num">2</span><span class="ttl">Outils et techniques du génie génétique</span></div>
+<div class="intro">
+  <p>Le développement des biotechnologies a permis des avancées considérables dans la manipulation des gènes, offrant de nouvelles possibilités dans des domaines comme la médecine, l’agriculture et l’environnement. Cette manipulation des gènes repose sur l’utilisation d’outils et de techniques de plus en plus sophistiqués.</p>
+  <p class="pb">Quels sont les outils et les techniques utilisés en génie génétique ?</p>
+</div>
+<div class="part"><span class="pl">A</span>Quelques techniques du génie génétique</div>
+<div class="frame">
+  <div class="dochead" id="a2d1"><b>Document 1:</b>Isolement du gène d’intérêt</div>
+  <p style="margin-bottom:.6mm">Pour transférer le ou les gène(s) d’intérêt, il faut d’abord les localiser puis les isoler. Le génie génétique a recours à différentes techniques :</p>
+  <div class="sub">1. Utilisation d’une sonde d’ADN</div>
+  <div class="row">
+    <div class="col txt" style="flex:2.3"><p>Il est possible de trouver un gène particulier à l’aide d’une <span class="hl">sonde d’ADN</span>. Une sonde d’ADN est une courte séquence complémentaire de la région cible du gène que l’on cherche à localiser. La sonde est souvent marquée par un élément visible ou détectable, comme un radio-isotope (élément radioactif). Ce marquage permet de visualiser ou de détecter la sonde une fois qu’elle s’est liée à l’ADN cible : une autoradiographie peut être utilisée pour visualiser le gène recherché.</p></div>
+    <figure style="flex:1"><img src="../images/doc13_fig1_sonde.png" style="height:26mm;width:auto"><figcaption><b>Fig 1 :</b> localisation d’un gène : la sonde radioactive se lie uniquement au gène complémentaire.</figcaption></figure>
+  </div>
+  <div class="sub">2. Utilisation des enzymes de restriction (ciseaux du génie génétique)</div>
+  <div class="row">
+    <div class="col" style="flex:.85"><div class="txt"><p>L’enzyme de restriction reconnaît une séquence spécifique de l’ADN (site de restriction) et coupe les deux brins à deux endroits légèrement décalés. La coupure donne alors des extrémités simple brin, ou <span class="hl">extrémités cohésives</span>, qui peuvent établir des liaisons hydrogène avec les bases complémentaires d’autres fragments d’ADN coupés par la même enzyme (fig 2).</p></div>
+      <figure class="nob" style="margin-top:1mm"><img src="../images/doc14_fig2_coupure.png" style="width:100%"></figure></div>
+    <figure class="nob" style="flex:1.45">
+      <table class="t">
+        <tr><th>Enzyme</th><th>Source</th><th>Séquence reconnue</th><th>Coupure</th></tr>
+        <tr><td class="k">EcoRI</td><td><i>Escherichia coli</i></td><td class="seq"><span class="e">5’</span> GAATTC <span class="e">3’</span><br><span class="e">3’</span> CTTAAG <span class="e">5’</span></td><td class="seq"><span class="e">5’</span>…G<span class="cut">|</span>AATTC…<span class="e">3’</span><br><span class="e">3’</span>…CTTAA<span class="cut">|</span>G…<span class="e">5’</span></td></tr>
+        <tr><td class="k">BamHI</td><td><i>Bacillus amyloliquefaciens</i></td><td class="seq"><span class="e">5’</span> GGATCC <span class="e">3’</span><br><span class="e">3’</span> CCTAGG <span class="e">5’</span></td><td class="seq"><span class="e">5’</span>…G<span class="cut">|</span>GATCC…<span class="e">3’</span><br><span class="e">3’</span>…CCTAG<span class="cut">|</span>G…<span class="e">5’</span></td></tr>
+        <tr><td class="k">HindIII</td><td><i>Haemophilus influenzae</i></td><td class="seq"><span class="e">5’</span> AAGCTT <span class="e">3’</span><br><span class="e">3’</span> TTCGAA <span class="e">5’</span></td><td class="seq"><span class="e">5’</span>…A<span class="cut">|</span>AGCTT…<span class="e">3’</span><br><span class="e">3’</span>…TTCGA<span class="cut">|</span>A…<span class="e">5’</span></td></tr>
+        <tr><td class="k">MstII</td><td><i>Microcoleus</i> sp.</td><td class="seq"><span class="e">5’</span> CCTNAGG <span class="e">3’</span><br><span class="e">3’</span> GGANTCC <span class="e">5’</span></td><td class="seq"><span class="e">5’</span>…CC<span class="cut">|</span>TNAGG…<span class="e">3’</span><br><span class="e">3’</span>…GGANT<span class="cut">|</span>CC…<span class="e">5’</span></td></tr>
+        <tr><td class="k">TaqI</td><td><i>Thermus aquaticus</i></td><td class="seq"><span class="e">5’</span> TCGA <span class="e">3’</span><br><span class="e">3’</span> AGCT <span class="e">5’</span></td><td class="seq"><span class="e">5’</span>…T<span class="cut">|</span>CGA…<span class="e">3’</span><br><span class="e">3’</span>…AGC<span class="cut">|</span>T…<span class="e">5’</span></td></tr>
+      </table>
+      <figcaption><b>Fig 2 :</b> quelques enzymes de restriction et leurs sites de coupure (N : nucléotide quelconque).</figcaption>
+    </figure>
+  </div>
+  <div class="sub" id="a2d1-3">3. Utilisation de la transcriptase inverse</div>
+  <div class="row">
+    <div class="col" style="flex:1.55">
+      <p class="txt">La transcriptase inverse est une enzyme qui permet de <span class="hl">synthétiser de l’ADN à partir d’ARN</span>. Cette technique est souvent utilisée pour obtenir de l’ADN complémentaire (ADNc) à partir de l’ARNm correspondant à la protéine que l’on veut produire, ce qui permet d’isoler des gènes exprimés dans une cellule sans passer par l’ADN génomique (fig 3).</p>
+      <p class="txt" style="background:#fdeaea"><span class="hl"><i>Remarque :</i></span> les ADN ligases sont des enzymes qui relient (soudent) des fragments d’ADN possédant des extrémités cohésives complémentaires, en rétablissant les liaisons phosphodiester entre leurs nucléotides.</p>
+    </div>
+    <figure style="flex:.8"><img src="../images/doc15_fig3_transcriptase.png" style="width:100%"><figcaption><b>Fig 3 :</b> utilisation de la transcriptase inverse.</figcaption></figure>
+  </div>
+</div>
+<div class="q"><span class="ql">Questions:</span><div class="qb"><ol>
+  <li>En exploitant la figure 1, <span class="v">déterminer</span> l’utilité des sondes nucléotidiques, puis <span class="v">montrer</span>, à partir de la figure 2, l’importance des enzymes de restriction.</li>
+  <li>En vous servant des données de la figure 3, <span class="v">décrire</span> les étapes de l’utilisation de la transcriptase inverse.</li>
+</ol></div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <p><b>1.</b> Les <b>sondes nucléotidiques</b> sont de courtes séquences d’ADN ou d’ARN (généralement simple brin) conçues pour être complémentaires d’une séquence cible : elles permettent d’identifier la présence d’un gène spécifique, de rechercher des gènes impliqués dans des maladies génétiques…</p>
+  <p>Les <b>enzymes de restriction</b> permettent de couper l’ADN à des endroits précis, ce qui est essentiel pour : insérer un gène dans un plasmide ; créer un ADN recombinant ; modifier ou supprimer un gène ; créer des plantes ou des animaux transgéniques. Les enzymes de restriction sont les « ciseaux moléculaires » de la biologie moléculaire : sans elles, la manipulation de l’ADN serait impossible à ce niveau de précision.</p>
+  <p><b>2.</b> La <b>transcriptase inverse</b> copie l’ARNm de la protéine que l’on souhaite produire artificiellement en ADN complémentaire (ADNc) :</p>
+  <ul>
+    <li>elle synthétise un brin d’ADNc à partir de l’ARNm → on obtient un hybride ARNm/ADNc ;</li>
+    <li>l’ARNm est éliminé, puis une ADN polymérase (ou parfois la transcriptase inverse elle-même) synthétise un deuxième brin d’ADN, complémentaire du premier ;</li>
+    <li>on obtient alors un ADN double brin : le gène recherché.</li>
+  </ul>
+</div>
+
+<div class="pb-eleve"></div>
+<div class="part"><span class="pl">B</span>Les étapes du transfert d’un gène à une bactérie</div>
+<div class="frame">
+  <div class="dochead"><b>Document 2:</b>Les vecteurs : moyens de transfert des gènes</div>
+  <p class="txt">Les vecteurs sont des éléments conçus pour transporter et insérer des gènes dans des cellules cibles, souvent à des fins de modification génétique. Il existe plusieurs types de vecteurs de gènes. Leur rôle est de :<br>
+  – transporter le gène d’intérêt (ou un autre type de matériel génétique) dans la cellule cible ;<br>
+  – contribuer au maintien et à la stabilisation de l’ADN étranger dans la cellule hôte.<br>
+  Lorsque le vecteur est introduit dans les cellules hôtes, celles-ci subissent plusieurs divisions, ce qui permet la production en grande quantité de l’ADN inséré (<span class="hl">clonage ou amplification</span>).</p>
+  <div class="row" style="padding:0 6mm">
+    <figure style="flex:530"><img src="../images/doc16_fig1_plasmide_vecteur.png" style="width:100%"><figcaption><b>Fig 1 :</b> plasmide vecteur.</figcaption></figure>
+    <figure style="flex:416"><img src="../images/doc17_fig2_vecteur_viral.png" style="width:100%"><figcaption><b>Fig 2 :</b> vecteur viral.</figcaption></figure>
+  </div>
+</div>
+<div class="q"><span class="ql">Question:</span><div class="qb">En exploitant les figures du document 2, <span class="v">décrire</span> chacun des deux vecteurs, puis <span class="v">dégager</span> leurs intérêts.</div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <table class="t">
+    <tr><th style="width:18%">Type de vecteur</th><th>Définition</th><th>Intérêt</th></tr>
+    <tr><td class="c"><b>Vecteur viral</b></td><td>Virus modifié utilisé pour transférer un gène dans une cellule. Le virus a été rendu inoffensif, mais il garde sa capacité à infecter les cellules et à y introduire du matériel génétique.</td><td>Plus adapté à la thérapie génique ou au transfert stable dans les cellules animales et humaines, surtout quand on veut que le gène soit exprimé durablement.</td></tr>
+    <tr><td class="c"><b>Plasmide vecteur</b></td><td>Petit ADN circulaire (souvent d’origine bactérienne) utilisé pour introduire un gène dans une cellule, en particulier en bactériologie ou en biologie moléculaire.</td><td>Utilisé surtout en laboratoire, pour le clonage ou dans les bactéries, quand on n’a pas besoin d’une intégration dans le génome.</td></tr>
+  </table>
+</div>
+
+<div class="frame">
+<div class="keep">
+  <div class="dochead"><b>Document 3:</b>Transfert des plasmides et sélection des cellules génétiquement modifiées</div>
+  <div class="sub">1. Technique de transfert direct des plasmides : l’électroporation</div>
+  <p>Les techniques de transfert direct d’ADN désignent les méthodes utilisées pour introduire de l’ADN dans des cellules sans l’aide de vecteurs biologiques (comme les plasmides ou les virus).</p>
+  <div class="row">
+    <div class="col txt" style="flex:.9"><p>L’électroporation consiste à appliquer aux cellules un champ électrique de haute intensité, ce qui provoque la formation de pores temporaires dans la membrane cellulaire. Ces pores permettent à l’ADN de pénétrer dans la cellule.</p></div>
+    <figure style="flex:1"><img src="../images/doc18_fig1_electroporation.png" style="width:100%"><figcaption><b>Fig 1 :</b> l’électroporation.</figcaption></figure>
+  </div>
+  </div>
+  <div class="sub">2. Sélection des cellules transformées : technique de criblage</div>
+  <div class="row">
+    <div class="col txt" style="flex:.7"><p>Les sondes radioactives sont des molécules d’ADN simple brin contenant des atomes radioactifs, dont la séquence est complémentaire de celle d’une partie du gène étudié.</p><p>Le schéma ci-contre illustre les étapes du criblage à l’aide de sondes radioactives.</p></div>
+    <figure style="flex:1"><img src="../images/doc19_fig2_criblage.png" style="width:100%"><figcaption><b>Fig 2 :</b> technique de criblage.</figcaption></figure>
+  </div>
+</div>
+<div class="q"><span class="ql">Questions:</span><div class="qb"><ol>
+  <li>En exploitant les données de la figure 1, <span class="v">dégager</span> l’intérêt de l’électroporation.</li>
+  <li>À partir des données de la figure 2, <span class="v">montrer</span> l’intérêt de la technique du criblage.</li>
+</ol></div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <p><b>1.</b> L’<b>électroporation</b> permet d’introduire de l’ADN (ou d’autres molécules) dans des cellules à l’aide d’une impulsion électrique. Elle fonctionne sur de nombreux types cellulaires (cellules bactériennes, animales, végétales, levures) et reste utile même pour des cellules difficiles à transformer par d’autres méthodes. Le protocole est simple et rapide (quelques minutes).</p>
+  <p><b>2.</b> Le <b>criblage</b> permet d’identifier efficacement, parmi un grand nombre de candidats, les cellules ou les clones qui possèdent une caractéristique génétique ou phénotypique d’intérêt. Il permet de sélectionner les cellules ou organismes transformés avec succès (ex. : porteurs du gène inséré, repérés par hybridation avec la sonde radioactive puis autoradiographie) ou ayant une propriété particulière (ex. : production d’une protéine, résistance à un antibiotique…).</p>
+</div>
+
+<!-- ================================================================ ACTIVITÉ 3 -->
+<div class="pagebreak"></div>
+<div class="bar act"><span class="lbl">Activité</span><span class="num">3</span><span class="ttl">Quelques applications du génie génétique</span></div>
+<div class="intro">
+  <p>Le génie génétique est un domaine de la biotechnologie qui permet de modifier l’ADN d’un organisme pour lui conférer de nouvelles caractéristiques ou de nouvelles fonctions. La <span class="hl">transgenèse</span> est une technique du génie génétique qui consiste à introduire dans un organisme un gène provenant d’un autre organisme, souvent d’une espèce différente. Cette technologie a conduit à des avancées majeures dans divers secteurs, de la médecine à l’agriculture.</p>
+  <p class="pb">Comment la transgenèse permet-elle la production d’hormones humaines et l’amélioration de la qualité et de la productivité de certaines plantes ? Quels sont les enjeux soulevés par l’utilisation de cette technologie ?</p>
+</div>
+<div class="part"><span class="pl">A</span>La production d’hormones humaines</div>
+<div class="frame">
+  <div class="dochead"><b>Document 1:</b>Production industrielle de l’insuline humaine</div>
+  <p class="txt">L’insuline est une hormone produite par le pancréas. Aujourd’hui, les diabétiques ont accès à de l’insuline humaine produite par génie génétique. Face à l’augmentation constante du nombre de cas de diabète, il était nécessaire de trouver une méthode pour produire de l’insuline en grande quantité et à moindre coût. Avec le développement du génie génétique, l’Homme s’est tourné vers les micro-organismes. Depuis 1984, la production commerciale d’insuline à grande échelle est réalisée grâce à <span class="hl">la bactérie <i>E. coli</i> génétiquement modifiée</span>. En 1987, on a également commencé à produire de l’insuline avec la levure <i>Saccharomyces cerevisiae</i>.</p>
+  <figure><img src="../images/doc20_insuline.png" style="width:186mm"><figcaption><b>Figure :</b> étapes de la production de l’insuline humaine par génie génétique.</figcaption></figure>
+</div>
+<div class="q"><span class="ql">Question:</span><div class="qb">En exploitant les données du document 1, <span class="v">décrire</span> les étapes de la production de l’insuline par génie génétique.</div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <ul>
+    <li>Le gène humain de l’insuline est identifié dans l’ADN génomique ;</li>
+    <li>on isole la séquence codante (gène de l’insuline), parfois à partir d’ADNc obtenu par transcriptase inverse à partir de l’ARNm des cellules du pancréas ;</li>
+    <li>le gène de l’insuline est inséré dans un plasmide (coupé par la même enzyme de restriction), qui servira de vecteur : on obtient un ADN recombinant ;</li>
+    <li>le plasmide recombinant est introduit dans les bactéries hôtes (généralement <i>E. coli</i>) par électroporation ou par choc thermique ;</li>
+    <li>les bactéries cultivées (cuve de fermentation) se multiplient, expriment le gène de l’insuline et produisent la protéine ;</li>
+    <li>l’insuline est extraite des bactéries (par lyse cellulaire), puis purifiée ;</li>
+    <li>l’insuline est testée (pureté, activité, absence de contaminants), puis formulée et conditionnée pour une utilisation médicale.</li>
+  </ul>
+</div>
+
+<div class="pb-eleve"></div>
+<div class="part"><span class="pl">B</span>L’amélioration de la qualité et de la productivité de certaines plantes</div>
+<div class="frame" id="a3d2">
+  <div class="dochead"><b>Document 2:</b>Production de variétés de maïs résistantes aux insectes nuisibles</div>
+  <div class="row">
+    <div class="col txt" style="flex:1.25"><p>La pyrale du maïs (<i>Ostrinia nubilalis</i>) est un insecte <span class="hl">ravageur</span> qui peut causer des dégâts importants au maïs conventionnel. Les chenilles de la pyrale creusent des galeries dans les tiges et les épis, affaiblissant la plante et réduisant le rendement. De plus, ces galeries peuvent favoriser le développement de bactéries et de champignons pathogènes, entraînant une baisse de la qualité des grains.</p></div>
+    <figure style="flex:1"><img src="../images/doc21_fig1_pyrale.png" style="width:100%"><figcaption><b>Fig 1 :</b> <b class="bl">a.</b> la pyrale du maïs ; <b class="bl">b.</b> dégâts causés par la chenille de la pyrale.</figcaption></figure>
+  </div>
+  <div class="row">
+    <div class="col txt" style="flex:1.45"><p><i>Bacillus thuringiensis</i> (Bt) est une bactérie (fig 3) présente naturellement dans le sol, qui produit des protéines insecticides (toxines Cry). La modification génétique du maïs pour produire ces protéines toxiques, spécifiquement contre des <span class="hl">insectes nuisibles</span> (pyrale du maïs), repose sur l’intégration dans le génome du maïs de gènes de Bt qui contrôlent la synthèse de ces protéines. Ces gènes sont généralement insérés dans les cellules du maïs soit par <span class="hl">transformation biologique</span> à l’aide d’<i>Agrobacterium tumefaciens</i>, soit par transfert direct à l’aide d’un <span class="hl">canon à particules</span> (fig 4).</p></div>
+    <figure style="flex:1"><img src="../images/doc22_fig2_mais.png" style="width:100%"><figcaption><b>Fig 2 :</b> effet de la pyrale sur du maïs non transgénique <b class="bl">(a)</b> et sur du maïs Bt <b class="bl">(b)</b>.</figcaption></figure>
+  </div>
+  <div class="row" style="align-items:center">
+    <figure style="flex:389"><img src="../images/doc23_fig3a_bt.png" style="height:27mm;width:auto"></figure>
+    <figure style="flex:267"><img src="../images/doc24_fig3b_proteine.png" style="height:27mm;width:auto"></figure>
+    <div class="cap" style="flex:300;text-align:left"><b>Fig 3 :</b> <b class="bl">a.</b> <i>Bacillus thuringiensis</i> (Bt) ; <b class="bl">b.</b> représentation schématique de la structure de la protéine insecticide produite par Bt.</div>
+  </div>
+  <figure><img src="../images/doc25_fig4_canon.png" style="width:150mm"><figcaption><b>Fig 4 :</b> transgenèse végétale par un vecteur non biologique : le canon à ADN (canon à particules).</figcaption></figure>
+</div>
+<div class="q"><span class="ql">Questions:</span><div class="qb"><ol>
+  <li>En exploitant les données de la figure 4, <span class="v">décrire</span> les étapes de la modification génétique du maïs pour produire des protéines insecticides.</li>
+  <li>En vous servant du document 2, <span class="v">dégager</span> l’intérêt de la lutte contre les insectes nuisibles du maïs par modification génétique par rapport aux méthodes classiques. Êtes-vous pour ou contre les OGM ? <span class="v">Justifier</span> votre opinion.</li>
+</ol></div></div>
+<div class="ans"><div class="at">Éléments de réponse</div>
+  <p><b>1.</b> Étapes de la modification génétique du maïs :</p>
+  <ul>
+    <li>le gène est issu de la bactérie <i>Bacillus thuringiensis</i> (Bt) ; il code une protéine toxique spécifique des insectes (toxine Bt ou protéine Cry) ;</li>
+    <li>le gène est isolé de l’ADN bactérien, puis inséré dans un vecteur d’expression (souvent un plasmide) ;</li>
+    <li>le vecteur est introduit dans les cellules de maïs par l’une de deux méthodes :
+      <ul>
+        <li><b>biolistique (canon à particules)</b> : des billes d’or ou de tungstène enrobées du gène d’intérêt (plasmides vecteurs) sont projetées dans les cellules de maïs ;</li>
+        <li><b><i>Agrobacterium tumefaciens</i></b> : bactérie naturellement capable de transférer des gènes aux plantes (moins utilisée pour le maïs à cause de sa faible efficacité) ;</li>
+      </ul>
+    </li>
+    <li>les cellules modifiées sont cultivées <i>in vitro</i> sur un milieu contenant un agent de sélection : seules les cellules ayant intégré le gène Bt survivent ;</li>
+    <li>ces cellules sont régénérées en plantes complètes (techniques de culture de tissus) ; on vérifie que le gène est bien intégré et exprimé ;</li>
+    <li>les plantes transgéniques sont exposées aux insectes nuisibles (ex. : pyrale du maïs) : on vérifie que la toxine Bt produite par la plante tue l’insecte sans nuire à la plante elle-même.</li>
+  </ul>
+  <p><b>2.</b> La modification génétique du maïs pour produire des protéines insecticides comme la toxine Bt est une méthode plus ciblée, plus écologique et efficace à long terme, alors que les traitements classiques aux pesticides, s’ils sont mal encadrés, polluent tout l’écosystème et sont coûteux.</p>
+  <p><b>Opinion sur les OGM</b> (exemples d’arguments) :</p>
+  <table class="t">
+    <tr><th>Arguments en faveur des OGM</th><th>Arguments contre une utilisation non encadrée des OGM</th></tr>
+    <tr><td style="vertical-align:top">– Amélioration des rendements agricoles ;<br>– réduction de l’usage des pesticides ;<br>– sécurité alimentaire : meilleure productivité (possibilité de nourrir plus de personnes), OGM enrichis (ex. : riz doré enrichi en bêta-carotène, précurseur de la vitamine A) ;<br>– avancées en médecine, avec une évaluation scientifique rigoureuse et un accès équitable aux technologies pour toutes les nations.</td>
+        <td style="vertical-align:top">– Risques d’effets non prévus sur l’environnement (pollinisation croisée, impact sur les espèces non ciblées) ;<br>– dépendance des agriculteurs aux semences commerciales brevetées ;<br>– méfiance du public, souvent liée à un manque de transparence ou de compréhension.</td></tr>
+  </table>
+  <p style="margin-top:1mm"><b>Conclusion :</b> les OGM sont des outils puissants qui peuvent avoir des bénéfices majeurs pour l’agriculture, la santé et l’environnement, mais ils doivent être utilisés avec prudence, transparence et dans un cadre réglementaire strict. Le débat ne devrait pas être « pour ou contre », mais « comment, pourquoi et pour qui » utiliser les OGM.</p>
+</div>
+
+<!-- ================================================================ SCHÉMA BILAN -->
+<div class="pagebreak always"></div>
+<div class="bilan-h">Schéma Bilan</div>
+<div class="bilan">
+  <div class="cycle">
+    <div class="step"><b><span>1.</span> Identification d’un gène d’intérêt</b>Sélection d’un gène spécifique (souvent issu d’un autre organisme) ayant une fonction recherchée (résistance, production d’une protéine…).</div>
+    <div class="arr">➜</div>
+    <div class="step"><b><span>2.</span> Isolement du gène</b>Extraction et amplification du gène par des techniques de biologie moléculaire (sonde, enzymes de restriction, transcriptase inverse, PCR…).</div>
+    <div class="arr">➜</div>
+    <div class="step"><b><span>3.</span> Insertion dans un vecteur</b>Le gène est inséré, grâce aux enzymes de restriction et à l’ADN ligase, dans un vecteur (plasmide bactérien, virus ou autre vecteur d’expression) : ADN recombinant.</div>
+
+    <div class="arr">⬆</div><div></div><div></div><div></div><div class="arr">⬇</div>
+
+    <div class="step"><b><span>8.</span> Contrôle de l’expression du gène</b>Vérification que le gène est bien exprimé et fonctionne comme prévu.</div>
+    <div></div>
+    <div class="center">Étapes de<br>la transgenèse</div>
+    <div></div>
+    <div class="step"><b><span>4.</span> Transfert du gène dans la cellule hôte</b>Introduction du vecteur dans la cellule cible : vecteur biologique (<i>Agrobacterium</i>, virus) ou transfert direct (électroporation, canon à particules, microinjection).</div>
+
+    <div class="arr">⬆</div><div></div><div></div><div></div><div class="arr">⬇</div>
+
+    <div class="step"><b><span>7.</span> Régénération de l’organisme entier</b>Culture des cellules transformées pour obtenir un organisme complet (plante, animal…).</div>
+    <div class="arr">⬅</div>
+    <div class="step"><b><span>6.</span> Sélection et culture des cellules transformées</b>Utilisation d’un gène de sélection (ex. : résistance à un antibiotique) ou d’une sonde (criblage) pour identifier les cellules transgéniques.</div>
+    <div class="arr">⬅</div>
+    <div class="step"><b><span>5.</span> Intégration du gène dans le génome</b>Le gène s’intègre au génome de la cellule hôte (de manière stable ou transitoire).</div>
+  </div>
+</div>
+
+<div class="retenir-h">À retenir : avantages et inconvénients de la transgenèse</div>
+<div class="retenir">
+  <table class="av">
+    <tr><th class="p">Avantages de la transgenèse</th><th class="m">Inconvénients de la transgenèse</th></tr>
+    <tr>
+      <td class="p"><ol>
+        <li><b>Amélioration des cultures agricoles</b>Résistance aux maladies, aux insectes, à la sécheresse ou aux herbicides.</li>
+        <li><b>Enrichissement nutritionnel</b>Ex. : le riz doré, modifié pour produire du bêta-carotène (précurseur de la vitamine A).</li>
+        <li><b>Conservation des produits alimentaires</b>Production de plantes transgéniques conçues pour avoir une durée de conservation prolongée.</li>
+        <li><b>Applications médicales</b>Production de médicaments (insuline…), de vaccins et d’anticorps thérapeutiques, contribuant ainsi aux avancées médicales.</li>
+      </ol></td>
+      <td class="m"><ol>
+        <li><b>Risques pour la santé humaine</b>Préoccupations concernant des effets à long terme, tels que des allergies ou des résistances aux antibiotiques.</li>
+        <li><b>Impact environnemental</b>Risque de perturber les écosystèmes locaux, d’affecter la biodiversité et d’entraîner la création d’espèces invasives.</li>
+        <li><b>Contamination génétique</b>Entre cultures OGM et cultures non OGM.</li>
+        <li><b>Dépendance économique</b>Si les brevets sur les semences transgéniques sont entre les mains de quelques multinationales, ils peuvent augmenter les coûts pour les agriculteurs et limiter leur autonomie.</li>
+        <li><b>Questions éthiques</b>La manipulation génétique soulève des débats sur le respect de la nature, la sécurité alimentaire et les droits des consommateurs, notamment l’étiquetage et le choix des produits.</li>
+      </ol></td>
+    </tr>
+  </table>
+  <p class="concl">La transgenèse offre des opportunités pour améliorer la production alimentaire, la nutrition et les soins de santé. Cependant, elle nécessite une régulation stricte, des études approfondies et une transparence accrue pour minimiser les risques et répondre aux préoccupations éthiques et environnementales.</p>
+</div>
+
+</body>
+</html>

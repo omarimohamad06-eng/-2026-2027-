@@ -1,0 +1,161 @@
+/* Style calqué sur les documents « 2BAC SVT – Unité II » (Pr : Omari Mohammed) */
+@font-face { font-family: "Jost"; font-weight: 400; src: url(fonts/jost-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Jost"; font-weight: 500; src: url(fonts/jost-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Jost"; font-weight: 600; src: url(fonts/jost-latin-600-normal.woff2) format("woff2"); }
+
+:root {
+  --red: #e2304a;        /* « Document 1: », « Questions: », « Activité » */
+  --blue: #1f6fb5;       /* titres des documents / activités */
+  --navy: #1f3864;       /* « Chapitre », texte foncé */
+  --frame: #5b8fd0;      /* cadres pointillés */
+  --band: #e9f1fb;       /* bandeau du titre de document */
+  --qbg: #eef4fb;        /* fond des boîtes Questions */
+  --qborder: #2f62a8;
+  --cap: #fdf0d5;        /* légendes beiges */
+  --pink: #f77fc9;       /* bandeau Situation de départ */
+  --orange: #f2774f;     /* Schéma bilan / À retenir */
+  --bilan: #d3e3f4;
+  --ans: #2e8b57;        /* version professeur */
+  --ansbg: #eff8f1;
+}
+
+@page { size: A4; margin: 13mm 8mm 12mm 8mm; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: "Carlito", "Calibri", sans-serif;
+  font-weight: 700; font-size: 10.3pt; line-height: 1.3; color: #1a1a1a;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+p { margin: 0 0 1.2mm; text-align: justify; }
+i, .sp { font-style: italic; }
+.hl { color: var(--red); }
+.bl { color: var(--blue); }
+
+/* ---------- Barre Chapitre / Activité ---------- */
+.bar { display: flex; align-items: center; margin: 1mm 0 2mm; break-after: avoid; }
+.bar .lbl { font-family: "Liberation Serif", "Times New Roman", serif; font-weight: 700; font-size: 15pt; padding: 0 1.5mm 0 3mm; }
+.bar .num { width: 8.5mm; height: 8.5mm; border: 1.4px solid var(--qborder); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: "Liberation Serif", serif; font-weight: 700; font-size: 15pt; background: #fff; position: relative; z-index: 2; margin-right: -3mm; }
+.bar .ttl { flex: 1; border: 1.3px solid var(--qborder); border-radius: 2.5mm; padding: 1.2mm 3mm 1.2mm 6mm; font-family: "Jost", sans-serif; font-weight: 500; font-size: 13.5pt; }
+.bar.chap .lbl { color: var(--navy); }
+.bar.chap .num { color: var(--navy); }
+.bar.chap .ttl { color: #c4124a; font-weight: 600; font-size: 15pt; }
+.bar.act .lbl { color: var(--red); }
+.bar.act .num { color: var(--red); }
+.bar.act .ttl { color: var(--blue); }
+
+/* ---------- Cadres pointillés ---------- */
+.frame { border: 1.3px dotted var(--frame); border-radius: 3mm; padding: 1.8mm 2.2mm 1.5mm; margin: 0 0 2mm; }
+.banner { background: var(--pink); border-radius: 2.5mm; text-align: center; font-family: "Jost", sans-serif; font-weight: 500;
+  font-size: 16pt; color: #2b2b2b; padding: .8mm 0 1.2mm; margin: 0 0 2mm; }
+
+.dochead { background: var(--band); margin: -1.8mm -2.2mm 2mm; padding: 1mm 3mm; border-radius: 3mm 3mm 0 0;
+  font-family: "Jost", sans-serif; font-weight: 500; font-size: 12.5pt; color: var(--blue); break-after: avoid; }
+.dochead b { color: var(--red); font-weight: 500; margin-right: 2mm; }
+
+.part { font-family: "Jost", sans-serif; font-weight: 500; font-size: 12pt; color: #c4124a; margin: .5mm 0 1mm; break-after: avoid; }
+.part .pl { display: inline-flex; width: 6.5mm; height: 6.5mm; border-radius: 50%; border: 1.3px solid #c4124a; align-items: center; justify-content: center; margin-right: 1.5mm; font-weight: 600; }
+.sub { display: inline-block; background: #dbe8f7; border: 1px solid #7aa3d6; color: var(--navy); padding: .4mm 3mm; font-size: 10pt; margin: .3mm 0 1mm; break-after: avoid; }
+
+/* Introduction + problème d'une activité */
+.intro { break-inside: avoid; background: #fbe5d6; border-radius: 2mm; padding: 1.6mm 3mm; margin-bottom: 2mm; }
+.intro .pb { color: var(--red); margin-top: 1mm; text-align: left; }
+.intro .pb::before { content: "?"; display: inline-flex; width: 4.6mm; height: 4.6mm; border-radius: 50%; background: #c0392b; color: #fff;
+  align-items: center; justify-content: center; font-size: 9pt; margin-right: 1.5mm; vertical-align: 1px; }
+
+/* ---------- Texte, figures, légendes ---------- */
+.txt { background: #fffaf0; padding: 1.2mm 2.2mm; border-radius: 1.5mm; margin-bottom: 2mm; }
+.box { border: 1px solid #3b6fb6; padding: 1.5mm; background: #fff; }
+.row { display: flex; gap: 2.5mm; align-items: stretch; margin-bottom: 1.6mm; break-inside: avoid; }
+.row > * { min-width: 0; }
+.col { display: flex; flex-direction: column; justify-content: center; }
+figure { margin: 0; display: flex; flex-direction: column; align-items: center; break-inside: avoid; }
+figure img { display: block; max-width: 100%; height: auto; border: .3mm solid #3b6fb6; }
+figure.nob img { border: none; }
+figcaption, .cap { background: var(--cap); text-align: center; padding: .8mm 2.2mm; margin-top: 1mm; font-size: 9.6pt; line-height: 1.22; }
+figcaption b, .cap b { color: var(--red); }
+.keep { break-inside: avoid; }
+
+ul.dash { margin: 0 0 1mm; padding-left: 5mm; }
+ul.dash li { margin-bottom: .6mm; text-align: justify; }
+ul.dash li::marker { color: var(--red); }
+
+/* Tableau des enzymes de restriction et tableaux de réponse */
+table.t { border-collapse: collapse; width: 100%; font-size: 9.3pt; break-inside: avoid; }
+table.t th { background: #fbe8a8; color: var(--navy); border: 1px solid #555; padding: .6mm 1.2mm; }
+table.t td { border: 1px solid #555; padding: .4mm 1.2mm; vertical-align: middle; text-align: left; }
+table.t td.c { text-align: center; }
+table.t td.k { background: #fdf3d3; text-align: center; color: var(--navy); }
+.seq { font-family: "Liberation Mono", monospace; font-weight: 700; font-size: 8.3pt; white-space: nowrap; line-height: 1.22; }
+.seq .e { color: #c4124a; font-family: "Carlito", sans-serif; }
+.seq .cut { color: #d0021b; }
+
+/* ---------- Questions ---------- */
+.q { display: flex; align-items: flex-start; gap: 2mm; margin: 1.5mm 0 2mm; break-inside: avoid; }
+.q .ql { font-family: "Jost", sans-serif; font-weight: 500; color: var(--red); font-size: 13pt; padding-top: 1.3mm; white-space: nowrap; }
+.q .qb { flex: 1; background: var(--qbg); border: 1.4px solid var(--qborder); border-radius: 2.5mm; padding: 1.5mm 3mm;
+  font-family: "Jost", sans-serif; font-weight: 400; font-size: 10.9pt; color: #111; line-height: 1.3; }
+.q .qb ol { margin: 0; padding-left: 5.5mm; }
+.q .qb li { margin: .3mm 0; }
+.q .qb .v { color: var(--blue); font-weight: 500; }
+
+/* ---------- Version professeur ---------- */
+.ans { display: none; }
+body.prof .ans { display: block; border: 1.3px solid var(--ans); border-left: 4px solid var(--ans); background: var(--ansbg);
+  border-radius: 2mm; padding: 1.5mm 3mm 1.8mm; margin: 1.5mm 0 2.5mm; font-weight: 400; font-size: 10.3pt; }
+body.prof .ans .at { color: var(--ans); font-weight: 700; font-family: "Jost", sans-serif; font-size: 11pt; margin-bottom: .6mm; }
+body.prof .ans p { margin-bottom: .8mm; }
+body.prof .ans b { font-weight: 700; }
+body.prof .ans ul { margin: .3mm 0 .8mm; padding-left: 5mm; }
+body.prof .ans li { margin-bottom: .3mm; text-align: justify; }
+body.prof .ans table.t { font-size: 9.8pt; font-weight: 400; margin-top: 1mm; }
+body.prof .ans table.t th { background: #f3d6e4; }
+.ans .split { break-inside: auto; }
+.only-eleve { }
+body.prof .only-eleve { display: none; }
+.only-prof { display: none; }
+body.prof .only-prof { display: block; }
+
+/* ---------- Schéma bilan ---------- */
+.bilan-h { background: var(--orange); color: #fff; text-align: center; font-family: "Jost", sans-serif; font-weight: 500; font-size: 14pt;
+  border-radius: 2.5mm 2.5mm 0 0; padding: .6mm 0 1mm; break-after: avoid; }
+.bilan { background: var(--bilan); border-radius: 0 0 3mm 3mm; padding: 3mm; margin-bottom: 3mm; break-inside: avoid; }
+.cycle { display: grid; grid-template-columns: 1fr 13mm 1fr 13mm 1fr; grid-template-rows: auto 9mm auto 9mm auto; align-items: stretch; }
+.step { background: #fff; border: 1.3px solid #2b9bb4; border-radius: 2mm; padding: 1.5mm 2mm; font-size: 9.8pt; font-weight: 400; text-align: left; }
+.step b { display: block; color: var(--navy); margin-bottom: .4mm; }
+.step b span { color: #1a9ab5; }
+.arr { display: flex; align-items: center; justify-content: center; color: #d6336c; font-size: 15pt; font-weight: 700; }
+.center { display: flex; align-items: center; justify-content: center; text-align: center; font-family: "Jost", sans-serif; font-weight: 600;
+  font-size: 16pt; color: #2a7d2e; line-height: 1.15; }
+.retenir-h { background: var(--orange); color: #fff; text-align: center; font-family: "Jost", sans-serif; font-weight: 500; font-size: 13pt;
+  border-radius: 2.5mm 2.5mm 0 0; padding: .6mm 0 1mm; break-after: avoid; }
+.retenir { border: 1.3px solid var(--bilan); background: #fff; border-radius: 0 0 3mm 3mm; padding: 2.5mm 3mm; break-inside: avoid; }
+table.av { border-collapse: collapse; width: 100%; font-size: 10pt; font-weight: 400; }
+table.av th { color: #fff; padding: 1.2mm; font-size: 11pt; }
+table.av th.p { background: #b3348f; } table.av th.m { background: #18a08a; }
+table.av td { vertical-align: top; border: 1px solid #999; padding: 1.5mm 2mm; width: 50%; }
+table.av td.p { background: #fbeef6; } table.av td.m { background: #eaf6f3; }
+table.av ol { margin: 0; padding-left: 4.5mm; }
+table.av li { margin-bottom: 1mm; text-align: justify; }
+table.av li b { display: block; color: var(--navy); }
+.concl { margin-top: 2mm; font-weight: 400; }
+
+.pagebreak { break-before: page; }
+.pb-eleve { break-before: page; }
+body.prof .pb-eleve { break-before: auto; }
+.pb-prof { break-before: auto; }
+body.prof .pb-prof { break-before: page; }
+.ans p, .ans li { orphans: 3; widows: 3; }
+.ans > .at { break-after: avoid; }
+
+/* Version professeur : les activités s'enchaînent (sauf le bilan), titres toujours attachés à la suite */
+body.prof .frame { break-inside: avoid; }
+body.prof .bar, body.prof .intro, body.prof .part { break-after: avoid; }
+body.prof .ans li { break-inside: avoid; }
+.keep:has(> .bar) { break-after: avoid; }
+body.prof .eleve-only-break { break-before: auto; }
+body.prof img.small-prof { width: 140mm !important; }
+/* Version professeur : documents réduits de 5 % pour laisser la place aux réponses */
+body.prof .frame { zoom: .95; }
+body.prof #a3d2 { zoom: .9; }
