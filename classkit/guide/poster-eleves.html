@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>SVT — Mode d’emploi de la classe</title>
+<style>
+  @page { size: A3 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  :root { --ink:#1b1a17; --muted:#6b655c; --line:#ddd5c6; --paper:#fbf8f2; --green:#1f7a4d; --green-pale:#e3f3ea; --blue:#2f4fa8; --blue-pale:#e6ecfa; --red:#c62828; --red-pale:#fde4e1; --amber:#b45309; --amber-pale:#fdf0d3; }
+  html, body { margin: 0; }
+  body { font-family: "Inter", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: #fff; }
+  .page { width: 297mm; height: 420mm; padding: 11mm 12mm 8mm; background: var(--paper); display: flex; flex-direction: column; gap: 4.5mm; overflow: hidden; }
+  .row1 { display: grid; grid-template-columns: 1.12fr 1fr; gap: 4.5mm; align-items: start; }
+  .phone.h-a { height: 62mm; object-fit: cover; object-position: top; }
+  .phone.h-b { height: 50mm; object-fit: cover; object-position: top; }
+  header { display: flex; align-items: center; gap: 8mm; border-bottom: 1.2mm solid var(--ink); padding-bottom: 4mm; }
+  header .logo { width: 19mm; height: 19mm; border-radius: 5mm; background: var(--green); color: #fff; display: grid; place-items: center; font: 900 7.5mm/1 system-ui; letter-spacing: -.02em; }
+  header h1 { margin: 0; font-size: 13mm; line-height: 1; letter-spacing: -.03em; }
+  header p { margin: 1.5mm 0 0; font-size: 5mm; color: var(--muted); }
+  header .classes { margin-left: auto; text-align: right; font-size: 4.2mm; font-weight: 700; line-height: 1.5; }
+  section { background: #fff; border: .5mm solid var(--line); border-radius: 5mm; padding: 4mm 5mm; position: relative; }
+  h2 { margin: 0 0 3mm; font-size: 6.6mm; letter-spacing: -.02em; display: flex; align-items: center; gap: 3mm; }
+  h2 .n { width: 10mm; height: 10mm; border-radius: 50%; background: var(--ink); color: #fff; display: inline-grid; place-items: center; font-size: 5.6mm; flex: none; }
+  .cap { font-size: 3.7mm; line-height: 1.35; color: var(--ink); }
+  .cap b { color: var(--ink); }
+  .muted { color: var(--muted); }
+  .phone { width: 100%; border-radius: 4.5mm; border: 1.6mm solid #1b1a17; display: block; background: #000; }
+  .shot { display: flex; flex-direction: column; gap: 2mm; }
+  .step { display: inline-grid; place-items: center; width: 7mm; height: 7mm; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 800; font-size: 4mm; margin-right: 1.5mm; vertical-align: middle; }
+  .grid { display: grid; gap: 5mm; }
+  /* section 1 — cards */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; }
+  .cardbox { text-align: center; }
+  .cardbox .frame { width: 100%; height: 30mm; display: grid; place-items: center; background: var(--paper); border-radius: 3mm; overflow: hidden; position: relative; }
+  .cardbox .badge { position: absolute; top: 1mm; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; font-weight: 900; font-size: 4.2mm; border-radius: 2mm; padding: .4mm 2mm; z-index: 2; }
+  .cardbox img { height: 23mm; width: auto; box-shadow: 0 .6mm 2mm rgba(0,0,0,.18); }
+  .cardbox .ans { font-size: 4.2mm; font-weight: 800; margin-top: 1.5mm; }
+  .cardbox .ans span { display: inline-grid; place-items: center; width: 8mm; height: 8mm; border-radius: 2mm; background: var(--ink); color: #fff; margin-left: 1mm; }
+  .rules { display: grid; grid-template-columns: 1fr; gap: 1.6mm; margin-top: 3mm; }
+  .rules div { font-size: 3.5mm; line-height: 1.3; padding-left: 6mm; position: relative; }
+  .rules div::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: 900; }
+  .rules div.no::before { content: "✕"; color: var(--red); }
+  /* section 2 — portal */
+  .s2 { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 5mm; align-items: start; }
+  .qrbox { background: var(--blue-pale); border-radius: 4mm; padding: 4mm; text-align: center; }
+  .qrbox svg { width: 30mm; height: 30mm; background: #fff; border-radius: 2mm; padding: 1.5mm; }
+  .url { font: 600 3.2mm ui-monospace, Menlo, Consolas, monospace; word-break: break-all; margin-top: 1.5mm; }
+  .warn { background: var(--amber-pale); border: .4mm solid #f0cf86; border-radius: 3mm; padding: 2.5mm 3mm; font-size: 3.6mm; line-height: 1.35; margin-top: 3mm; }
+  /* section 3 — grade */
+  .crit { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; align-items: stretch; }
+  .crit .c { border-radius: 3.5mm; padding: 2.2mm 3mm; background: var(--green-pale); }
+  .crit .c .hd { display: flex; justify-content: space-between; align-items: baseline; }
+  .crit .c .hd b { font-size: 4.4mm; }
+  .crit .c .pts { font-size: 6mm; font-weight: 900; letter-spacing: -.03em; color: var(--green); line-height: 1.1; }
+  .crit .c p { margin: .6mm 0 0; font-size: 3.3mm; line-height: 1.3; }
+  .crit .eq { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 2mm; font-size: 5mm; font-weight: 900; padding: 2mm; background: var(--ink); color: #fff; border-radius: 3.5mm; }
+  .final { margin-top: 2.5mm; background: var(--paper); border-radius: 3.5mm; padding: 3mm 4mm; font-size: 4.3mm; display: flex; gap: 4mm; align-items: center; flex-wrap: wrap; }
+  .final code { font: 800 4mm system-ui; background: #fff; border: .4mm solid var(--line); border-radius: 2mm; padding: 1mm 2.5mm; }
+  /* section 4 — quiz */
+  .s4 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3.5mm; }
+  .s4 .shot.bad .phone { border-color: var(--red); }
+  .forbid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.5mm; margin-top: 3mm; }
+  .forbid div { background: var(--red-pale); border-radius: 3mm; padding: 2.2mm 2mm; text-align: center; font-size: 3.3mm; line-height: 1.25; font-weight: 600; color: #7f1d1d; }
+  .forbid div i { display: block; font-style: normal; font-size: 6.5mm; margin-bottom: .8mm; }
+  footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 3.4mm; color: var(--muted); border-top: .4mm solid var(--line); padding-top: 2.5mm; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo">SVT</div>
+    <div>
+      <h1>Mode d’emploi de la classe</h1>
+      <p>Cartes-réponses · Mes notes en ligne · Quiz sur téléphone — année 2026/2027</p>
+    </div>
+    <div class="classes">Pr Omari Mohammed<br>TCS1 · TCL1 · TCL2<br>2BAC PC · 2BAC SVT</div>
+  </header>
+
+  <div class="row1">
+  <!-- 1. Cartes QR -->
+  <section>
+    <h2><span class="n">1</span>Je réponds avec ma carte QR</h2>
+    <div class="cards">
+      <div class="cardbox"><div class="frame"><span class="badge">↑ A</span><img src="img/card.png" style="transform:rotate(0deg)"></div><div class="ans">Réponse <span>A</span></div><div class="cap muted">A en haut</div></div>
+      <div class="cardbox"><div class="frame"><span class="badge">↑ B</span><img src="img/card.png" style="transform:rotate(-90deg)"></div><div class="ans">Réponse <span>B</span></div><div class="cap muted">B en haut</div></div>
+      <div class="cardbox"><div class="frame"><span class="badge">↑ C</span><img src="img/card.png" style="transform:rotate(180deg)"></div><div class="ans">Réponse <span>C</span></div><div class="cap muted">C en haut</div></div>
+      <div class="cardbox"><div class="frame"><span class="badge">↑ D</span><img src="img/card.png" style="transform:rotate(90deg)"></div><div class="ans">Réponse <span>D</span></div><div class="cap muted">D en haut</div></div>
+    </div>
+    <div class="rules">
+      <div>Chaque élève a <b>sa propre carte</b>, avec son numéro et son nom.</div>
+      <div>Tourne la carte : <b>la lettre de ta réponse en haut</b>. Lève-la bien droite, immobile, jusqu’à ce que ton numéro devienne <b style="color:var(--green)">vert</b> à l’écran.</div>
+      <div>Tu peux changer d’avis : c’est <b>la dernière lecture</b> qui compte.</div>
+      <div class="no">Ne cache pas le code avec tes doigts et <b>ne montre pas ta lettre</b> à tes voisins.</div>
+    </div>
+  </section>
+
+  <!-- 3. Calcul -->
+  <section>
+    <h2><span class="n">3</span>Ma note d’activités intégrées</h2>
+    <div class="crit">
+      <div class="c"><div class="hd"><b>Participation</b><span class="pts">/5</span></div><p>Bonnes réponses, passage au tableau… <span style="color:var(--red)">Bavardage = −</span></p></div>
+      <div class="c"><div class="hd"><b>Absence</b><span class="pts">/5</span></div><p>Tu pars de 5 : <b>−0,5</b> par séance d’absence (une table vide = une absence).</p></div>
+      <div class="c"><div class="hd"><b>Organisation du cahier</b><span class="pts">/5</span></div><p>Cours complet, propre, organisé (2 contrôles).</p></div>
+      <div class="c"><div class="hd"><b>Travail à rédiger</b><span class="pts">/5</span></div><p>Rendu à temps, soigné, personnel.</p></div>
+      <div class="eq">Total = Activités intégrées /20</div>
+    </div>
+    <div class="final"><div><b>Note finale</b> =<br><code>(Contrôle 1 + Contrôle 2 + Activités) ÷ 3</code></div></div>
+  </section>
+
+  </div>
+
+  <!-- 2. Portail -->
+  <section>
+    <h2><span class="n">2</span>Je consulte mes notes en ligne</h2>
+    <div class="s2">
+      <div class="shot">
+        <img class="phone h-a" src="img/login.png">
+        <div class="cap"><span class="step">1</span>Choisis ta <b>classe</b>, écris ton <b>numéro</b> et ton <b>code PIN</b> (6 caractères, sur le papier donné par le professeur).</div>
+      </div>
+      <div class="shot">
+        <img class="phone h-a" src="img/grades.png">
+        <div class="cap"><span class="step">2</span>Tu vois ta <b>note finale</b>, tes contrôles et le détail de tes <b>activités intégrées</b>, avec la remarque du professeur.</div>
+      </div>
+      <div>
+        <div class="qrbox">
+          <div id="qr"></div>
+          <div class="cap"><b>Scanne pour ouvrir « Mes notes »</b></div>
+          <div class="url" id="url"></div>
+        </div>
+        <div class="cap" style="margin-top:3mm"><span class="step">3</span><b>Chaque +</b> et <b>chaque −</b> est affiché avec la date, l’heure et la raison : tu sais toujours pourquoi ta note a changé.</div>
+        <div class="warn">🔒 <b>Ton PIN est secret.</b> Ne le donne à personne : avec lui, on voit tes notes. Perdu ? Demande un nouveau PIN au professeur.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Quiz -->
+  <section>
+    <h2><span class="n">4</span>Je passe un quiz sur mon téléphone</h2>
+    <div class="s4">
+      <div class="shot"><img class="phone h-b" src="img/quizcode.png"><div class="cap"><span class="step">1</span>Ouvre <b>Quiz</b>, connecte-toi, puis tape le <b>code écrit au tableau</b>.</div></div>
+      <div class="shot"><img class="phone h-b" src="img/rules.png"><div class="cap"><span class="step">2</span>Lis les règles, puis <b>« J’ai compris — commencer »</b>.</div></div>
+      <div class="shot"><img class="phone h-b" src="img/question.png"><div class="cap"><span class="step">3</span>Questions <b>différentes de ton voisin</b>, une à la fois, <b>sans retour en arrière</b>, temps limité.</div></div>
+      <div class="shot"><img class="phone h-b" src="img/finished.png"><div class="cap"><span class="step">4</span>À la fin, <b>montre ce QR code</b> au professeur : il le scanne pour enregistrer ta note.</div></div>
+      <div class="shot bad"><img class="phone h-b" src="img/removed.png"><div class="cap" style="color:var(--red)"><b>Exclu !</b> Tu gardes seulement la note que tu avais à ce moment-là.</div></div>
+    </div>
+    <div class="forbid">
+      <div><i>🚪</i>Quitter la page ou recharger</div>
+      <div><i>💬</i>Ouvrir une autre appli (WhatsApp, IA…)</div>
+      <div><i>🔔</i>Ouvrir les notifications</div>
+      <div><i>🪟</i>Écran partagé ou fenêtre flottante</div>
+      <div><i>🌐</i>Traduire la page</div>
+      <div><i>📋</i>Copier ou capturer l’écran</div>
+    </div>
+  </section>
+
+  <footer><span>ClassKit · SVT · Pr Omari Mohammed</span><span>Une question ? Demande au professeur avant le quiz, pas pendant 😉</span></footer>
+</div>
+<script src="../vendor/qrcode.js"></script>
+<script>
+  // Address of the student portal; ?url=… overrides it (e.g. after renaming the repository).
+  const base = new URLSearchParams(location.search).get('url') || 'https://omarimohamad06-eng.github.io/-2026-2027-/classkit/';
+  const url = base.replace(/\/?$/, '/') + 'portal.html';
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+  document.getElementById('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  document.getElementById('url').textContent = url.replace(/^https:\/\//, '');
+</script>
+</body>
+</html>
