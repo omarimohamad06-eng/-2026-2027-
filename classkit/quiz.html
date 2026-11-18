@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" translate="no" class="notranslate">
+<html lang="fr" translate="no" class="notranslate">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -43,13 +43,13 @@
   const { esc, fmt } = CK;
   const m = document.getElementById('m');
   let data, me, quiz, att, attKey, timerT = 0;
-  const REASON_TEXT = { L: 'You left the quiz page.', T: 'The page was translated.', R: 'Split screen or a floating window was used.', C: 'Copying is not allowed.', S: 'Screenshot key pressed.' };
+  const REASON_TEXT = { L: 'Tu as quitté la page du quiz.', T: 'La page a été traduite.', R: 'Écran partagé ou fenêtre flottante utilisé.', C: 'La copie est interdite.', S: 'Touche de capture d’écran.' };
 
   async function boot() {
     try {
       const r = await fetch('data/portal.json?t=' + Date.now(), { cache: 'no-store' });
       data = await r.json();
-    } catch (e) { m.innerHTML = '<div class="qc">No quiz is published yet.</div>'; return; }
+    } catch (e) { m.innerHTML = '<div class="qc">Aucun quiz n’est publié pour le moment.</div>'; return; }
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('classkit.portal.login') || 'null'); } catch (e) {}
     login(saved);
@@ -57,11 +57,11 @@
 
   function login(saved, err) {
     m.innerHTML = `<div class="qc"><h2>Quiz</h2>
-      <label class="f">Class<select id="c">${data.classes.map(c => `<option value="${c.id}" ${saved && saved.c === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label><br>
-      <label class="f">Your number<input type="number" id="n" inputmode="numeric" value="${saved ? saved.n : ''}"></label><br>
-      <label class="f">Your PIN<input type="text" id="p" autocomplete="off" autocapitalize="characters" value="${saved ? esc(saved.p) : ''}" style="letter-spacing:.2em;text-transform:uppercase"></label>
+      <label class="f">Classe<select id="c">${data.classes.map(c => `<option value="${c.id}" ${saved && saved.c === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label><br>
+      <label class="f">Ton numéro<input type="number" id="n" inputmode="numeric" value="${saved ? saved.n : ''}"></label><br>
+      <label class="f">Ton code PIN<input type="text" id="p" autocomplete="off" autocapitalize="characters" value="${saved ? esc(saved.p) : ''}" style="letter-spacing:.2em;text-transform:uppercase"></label>
       ${err ? `<p class="red">${esc(err)}</p>` : ''}
-      <button class="go" id="go">Continue</button></div>`;
+      <button class="go" id="go">Continuer</button></div>`;
     document.getElementById('go').onclick = async () => {
       const c = document.getElementById('c').value, n = +document.getElementById('n').value, p = document.getElementById('p').value;
       const box = data.records[c + ':' + n];
@@ -70,21 +70,21 @@
         me = { cls: c, n, card: rec.card, name: rec.name, clsName: rec.cls };
         localStorage.setItem('classkit.portal.login', JSON.stringify({ c, n, p }));
         pickQuiz();
-      } catch (e) { login({ c, n, p: '' }, 'Wrong number or PIN.'); }
+      } catch (e) { login({ c, n, p: '' }, 'Numéro ou code PIN incorrect.'); }
     };
   }
 
   function pickQuiz(err) {
     const list = data.quizzes.filter(q => q.classIds.includes(me.cls));
-    m.innerHTML = `<div class="qc"><div class="muted small">${esc(me.clsName)} · No. ${me.n}</div><h2 class="ar">${esc(me.name)}</h2>
+    m.innerHTML = `<div class="qc"><div class="muted small">${esc(me.clsName)} · N° ${me.n}</div><h2 class="ar">${esc(me.name)}</h2>
       ${list.length ? `<label class="f">Quiz<select id="q">${list.map(q => `<option value="${q.id}">${esc(q.title)}</option>`).join('')}</select></label><br>
-      <label class="f">Code written on the board<input type="text" id="code" autocomplete="off" autocapitalize="characters" style="letter-spacing:.25em;text-transform:uppercase;font-size:20px;text-align:center"></label>
-      ${err ? `<p class="red">${esc(err)}</p>` : ''}<button class="go" id="go">Open quiz</button>` : '<p class="muted">No quiz is open for your class right now.</p>'}</div>`;
+      <label class="f">Code écrit au tableau<input type="text" id="code" autocomplete="off" autocapitalize="characters" style="letter-spacing:.25em;text-transform:uppercase;font-size:20px;text-align:center"></label>
+      ${err ? `<p class="red">${esc(err)}</p>` : ''}<button class="go" id="go">Ouvrir le quiz</button>` : '<p class="muted">Aucun quiz n’est ouvert pour ta classe en ce moment.</p>'}</div>`;
     if (!list.length) return;
     document.getElementById('go').onclick = async () => {
       const q = list.find(x => x.id === document.getElementById('q').value);
       try { quiz = await CK.open(q.box, document.getElementById('code').value); }
-      catch (e) { return pickQuiz('Wrong code.'); }
+      catch (e) { return pickQuiz('Code incorrect.'); }
       attKey = `classkit.attempt.${quiz.id}.${me.card}`;
       try { att = JSON.parse(localStorage.getItem(attKey) || 'null'); } catch (e) { att = null; }
       if (att && att.status !== 'run') return finishScreen();
@@ -103,14 +103,14 @@
 
   function rules() {
     m.innerHTML = `<div class="qc"><h2>${esc(quiz.title)}</h2>
-      <p>${buildPaper().length} questions · ${quiz.minutes} min · score /${quiz.outOf}</p>
+      <p>${buildPaper().length} questions · ${quiz.minutes} min · note /${quiz.outOf}</p>
       <ul class="rules">
-        <li>Your questions are <b>different</b> from your neighbour's.</li>
-        <li>One question at a time. You <b>cannot go back</b>.</li>
-        <li>If you <b>leave this page</b>, switch app, open notifications, use split screen, translate the page, copy or take a screenshot, <b class="red">you are removed immediately</b> with the score you had at that moment.</li>
-        <li>Do not reload the page.</li>
+        <li>Tes questions sont <b>différentes</b> de celles de ton voisin.</li>
+        <li>Une question à la fois. <b>Impossible de revenir en arrière</b>.</li>
+        <li>Si tu <b>quittes cette page</b>, changes d’application, ouvres les notifications, utilises l’écran partagé, traduis la page, copies ou fais une capture d’écran, <b class="red">tu es exclu immédiatement</b> avec la note que tu avais à ce moment.</li>
+        <li>Ne recharge pas la page.</li>
       </ul>
-      <button class="go" id="go">I understand — start</button></div>`;
+      <button class="go" id="go">J’ai compris — commencer</button></div>`;
     document.getElementById('go').onclick = () => {
       const el = document.documentElement;
       if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
@@ -176,7 +176,7 @@
   function onKey(e) { if (e.key === 'PrintScreen') remove('S'); }
   const obs = new MutationObserver(muts => {
     const html = document.documentElement;
-    if (/translated/.test(html.className) || (html.lang && html.lang !== 'en')) return remove('T');
+    if (/translated/.test(html.className) || (html.lang && html.lang !== 'fr')) return remove('T');
     for (const mu of muts) for (const n of mu.addedNodes || []) if (n.nodeName === 'FONT') return remove('T');
   });
 
@@ -196,7 +196,7 @@
       <div class="qc"><div class="qtext ar">${esc(q.q)}</div>
         ${p.order.map((j, x) => `<button class="opt ar" data-j="${j}">${'ABCDEFG'[x]}. ${esc(q.c[j])}</button>`).join('')}
         ${quiz.aiGuard ? `<div class="guard">${esc(quiz.aiGuard)}</div>` : ''}
-        <button class="go" id="nx" disabled>${k + 1 === total ? 'Finish' : 'Next'}</button></div>`;
+        <button class="go" id="nx" disabled>${k + 1 === total ? 'Terminer' : 'Suivant'}</button></div>`;
     m.querySelectorAll('.opt').forEach(b => b.onclick = () => {
       m.querySelectorAll('.opt').forEach(x => x.classList.remove('sel'));
       b.classList.add('sel'); sel = +b.dataset.j; document.getElementById('nx').disabled = false;
@@ -221,13 +221,13 @@
     const removed = att.status === 'removed';
     m.innerHTML = `<div class="qc center">
       <div class="icon">${removed ? '🚫' : att.status === 'timeup' ? '⏱' : '✅'}</div>
-      <h2 class="${removed ? 'red' : 'green'}">${removed ? 'Removed from Quiz' : att.status === 'timeup' ? 'Time is up' : 'Quiz finished'}</h2>
-      ${removed ? `<p>${REASON_TEXT[att.reason] || ''}</p><p class="muted">Score at time of removal:</p>` : '<p class="muted">Your score:</p>'}
+      <h2 class="${removed ? 'red' : 'green'}">${removed ? 'Exclu du quiz' : att.status === 'timeup' ? 'Temps écoulé' : 'Quiz terminé'}</h2>
+      ${removed ? `<p>${REASON_TEXT[att.reason] || ''}</p><p class="muted">Note au moment de l’exclusion :</p>` : '<p class="muted">Ta note :</p>'}
       <div class="res">${fmt(score)} / ${quiz.outOf}</div>
-      <p class="muted small" style="margin-top:14px">Show this code to your teacher</p>
+      <p class="muted small" style="margin-top:14px">Montre ce code à ton professeur</p>
       <div class="qr">${CK.qrSvg(code, { ec: 'M' })}</div>
       <div class="code">${code}</div>
-      <p class="small muted ar">${esc(me.name)} · ${esc(me.clsName)} · No. ${me.n}</p></div>`;
+      <p class="small muted ar">${esc(me.name)} · ${esc(me.clsName)} · N° ${me.n}</p></div>`;
   }
 
   boot();

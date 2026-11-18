@@ -108,19 +108,24 @@
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" class="${opts.cls || ''}"><rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
   }
 
-  /** Grade maths, shared so the portal shows exactly what the teacher sees. */
-  function computeGrades(gr, cfg) {
+  /** Grade maths (SVT activités intégrées), shared so the portal shows exactly what the teacher sees.
+      participation + absence + organisation du cahier + travail à rédiger → /20 (rescaled if the maxima don't add up to 20);
+      absence = max − penalty × sessions missed + manual adjustment. Final = mean of Contrôle 1, Contrôle 2 and activités. */
+  function computeGrades(gr, cfg, nAbs) {
     cfg = cfg || {};
-    const factor = cfg.presFactor == null ? 1 : cfg.presFactor;
+    const M = { part: cfg.maxPart || 5, abs: cfg.maxAbs || 5, cah: cfg.maxCahier || 5, tra: cfg.maxTravail || 5 };
     const num = v => (v === '' || v == null || isNaN(+v)) ? null : +v;
-    const copybook = cfg.copybookChecks === 1 ? (num(gr.cb1) || 0) : ((num(gr.cb1) || 0) + (num(gr.cb2) || 0)) / 2;
-    const oral = clamp((num(gr.part) || 0) + (num(gr.disc) || 0) + copybook, 0, 20);
-    const b1 = (num(gr.p1) || 0) * factor, b2 = (num(gr.p2) || 0) * factor;
-    const t1 = num(gr.t1) == null ? null : clamp(num(gr.t1) + b1, 0, 20);
-    const t2 = num(gr.t2) == null ? null : clamp(num(gr.t2) + b2, 0, 20);
-    const parts = [t1, t2, oral].filter(v => v != null);
+    nAbs = nAbs || 0;
+    const part = clamp(num(gr.part) || 0, 0, M.part);
+    const absence = clamp(M.abs - (cfg.absPenalty == null ? 0.5 : cfg.absPenalty) * nAbs + (num(gr.absAdj) || 0), 0, M.abs);
+    const cahier = cfg.cahierChecks === 1 ? (num(gr.cb1) || 0) : ((num(gr.cb1) || 0) + (num(gr.cb2) || 0)) / 2;
+    const travail = cfg.travailCount === 1 ? (num(gr.tr1) || 0) : ((num(gr.tr1) || 0) + (num(gr.tr2) || 0)) / 2;
+    const total = M.part + M.abs + M.cah + M.tra;
+    const act = clamp((part + absence + cahier + travail) / total * 20, 0, 20);
+    const t1 = num(gr.t1), t2 = num(gr.t2);
+    const parts = [t1, t2, act].filter(v => v != null);
     const final = (t1 == null && t2 == null) ? null : parts.reduce((a, b) => a + b, 0) / parts.length;
-    return { copybook, oral, b1, b2, t1, t2, final };
+    return { part, absence, nAbs, cahier, travail, act, t1, t2, final };
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function fmt(v, d) {

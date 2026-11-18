@@ -1,6 +1,6 @@
 # ClassKit — gradebook, seating plan, QR cards and anti-cheat phone quiz
 
-A classroom kit for **TCS1, TCL1, TCL2, 2BAC PC and 2BAC SVT** (2026/2027). It's plain HTML and JavaScript: nothing to install and no account to create.
+A classroom kit for SVT classes **TCS1, TCL1, TCL2, 2BAC PC and 2BAC SVT** (2026/2027). Student pages are in French. It's plain HTML and JavaScript: nothing to install and no account to create.
 
 | Page | Who | What |
 |---|---|---|
@@ -23,14 +23,30 @@ because the repository is public. Keep a copy on a USB key. You can also paste a
 
 All data stays in the browser on that computer (localStorage). Go to **Settings → Download backup** every week.
 
-## 2. Integrated activities (oral assessment /20)
+## 2. Activités intégrées (/20), SVT
 
-- **Participation /10**, **Discipline /5** (starts at 5 and goes down), **Copybook /5** (the average of two checks).
-- Oral = participation + discipline + copybook. Final = average of Test 1, Test 2 and Oral.
-  Presentation points (/5) are added to their test as a bonus, capped at 20. The multiplier can be changed in Settings.
-- Every +/− is saved with its date, time and an optional reason ("Talking during explanation", "Great answer"…).
-  Students see this full history in their portal, so they know exactly why their grade went up or down.
-- **Seating → Points**: tap a student on the room plan to add or remove points while you teach, without opening the gradebook.
+| Critère | Max (default) | How it is filled in |
+|---|---|---|
+| **Participation** | 5 | +/− in the gradebook, or tap the student on the seating plan (Points mode) |
+| **Absence** | 5 | **automatic**: 5 − 0.5 for each session the student was marked absent; +/− buttons to adjust (e.g. a justified absence) |
+| **Organisation du cahier** | 5 | 2 checks per semester, averaged (or 1 check) |
+| **Travail à rédiger** | 5 | 2 pieces of written work, averaged (or 1) |
+
+The maxima, the penalty per absence and the number of checks are set in **Settings → Barème**. If the maxima don't add up to 20,
+the score is scaled to /20. **Note finale** = average of Contrôle 1, Contrôle 2 and Activités intégrées.
+
+Every +/− is saved with its date, time and an optional reason ("Bonne réponse", "Bavardage", "Cahier incomplet", "Travail non rendu"…).
+Students see this full history on their portal, in French.
+
+### SVT question banks
+
+`js/banks.js` holds **69 multiple-choice questions** written from your 2BAC SVT Unit II lessons (Pr Omari):
+chapter 1 *Notion de l'information génétique* (22), chapter 2 *Expression de l'information génétique* (24) and chapter 3 *Le génie génétique* (23).
+- **Phone quiz → New quiz → Banque de questions → Add these questions**: delete or edit any you don't want.
+- **QR cards → Banque → Question suivante**: shows the question and its 4 choices on the projector, with the correct letter already set.
+  After **Save result**, the camera stays on for the next question.
+
+To add a chapter or another level (TC, 1BAC…), copy one block in `js/banks.js`: `{ q: 'question', c: ['A', 'B', 'C', 'D'], a: index of the correct answer }`.
 
 ## 3. Attendance in seconds
 
@@ -60,7 +76,7 @@ In **Attendance** mode, tap each empty table's student: the seat turns red and t
      Long-press (Google Lens) and text selection are blocked.
    - A small sentence in Japanese (or Chinese) under every question tells AI assistants not to answer it if they receive a screenshot.
 4. At the end each phone shows a **result QR code**. Open **Results → Scan result codes**, scan the phones one after another,
-   then **Copy scores into Test 1/Test 2** if you want.
+   then **Copy scores into Contrôle 1/Contrôle 2** if you want.
    The code is signed, so a student can't change "removed" into "finished".
 
 > Limits: no website can detect a screenshot on a phone. The rules that do work are that opening any other app
@@ -85,6 +101,7 @@ classkit/portal.html       student grades portal
 classkit/quiz.html         phone quiz
 classkit/js/app.js         teacher logic (storage, seating, gradebook, cards, quizzes, publishing)
 classkit/js/shared.js      encryption, grade formula, QR drawing, anti-AI sentences
+classkit/js/banks.js       SVT question banks (2BAC SVT, Unit II, chapters 1–3)
 classkit/js/scanner.js     camera scanner: several QR cards per frame, and which side is up
 classkit/vendor/           jsQR 1.4.0 (Apache-2.0) and qrcode-generator 1.4.4 (MIT), copied here so it works offline
 classkit/data/             published portal.json (encrypted)

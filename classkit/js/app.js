@@ -14,8 +14,8 @@
   const blank = () => ({
     v: 1,
     settings: {
-      teacher: '', school: '', year: '2026/2027', subject: 'English',
-      discStart: 5, presFactor: 1, copybookChecks: 2, step: 0.5,
+      teacher: '', school: '', year: '2026/2027', subject: 'SVT',
+      maxPart: 5, maxAbs: 5, maxCahier: 5, maxTravail: 5, absPenalty: 0.5, cahierChecks: 2, travailCount: 2, step: 0.5,
       portalUrl: '', gh: { owner: '', repo: '', branch: '', path: 'classkit/data/portal.json', token: '' },
       blurNames: false,
     },
@@ -40,7 +40,7 @@
   const stuById = id => { for (const c of S.classes) { const s = c.students.find(x => x.id === id); if (s) return s; } return null; };
   const name = s => `${s.first} ${s.last}`.trim();
   function gr(sid) {
-    if (!S.grades[sid]) S.grades[sid] = { part: 0, disc: S.settings.discStart, cb1: 0, cb2: 0, note: '', t1: '', t2: '', p1: 0, p2: 0 };
+    if (!S.grades[sid]) S.grades[sid] = { part: 0, absAdj: 0, cb1: 0, cb2: 0, tr1: 0, tr2: 0, note: '', t1: '', t2: '' };
     return S.grades[sid];
   }
   function absentOn(c, date) { return ((S.absences[c.id] || {})[date]) || []; }
@@ -54,16 +54,26 @@
     save();
   }
 
+  // Activités intégrées (SVT): participation, absence, organisation du cahier, travail à rédiger.
   const FIELDS = {
-    part: { label: 'Participation', max: 10 }, disc: { label: 'Discipline', max: 5 },
-    cb1: { label: 'Copybook check 1', max: 5 }, cb2: { label: 'Copybook check 2', max: 5 },
-    p1: { label: 'Presentation 1', max: 5 }, p2: { label: 'Presentation 2', max: 5 },
-    t1: { label: 'Test 1', max: 20 }, t2: { label: 'Test 2', max: 20 },
+    part: { label: 'Participation', get max() { return S.settings.maxPart; } },
+    absAdj: { label: 'Absence (ajustement)', get max() { return S.settings.maxAbs; }, get min() { return -S.settings.maxAbs; } },
+    cb1: { label: 'Organisation du cahier', get max() { return S.settings.maxCahier; } },
+    cb2: { label: 'Organisation du cahier (2e contrôle)', get max() { return S.settings.maxCahier; } },
+    tr1: { label: 'Travail à rédiger 1', get max() { return S.settings.maxTravail; } },
+    tr2: { label: 'Travail à rédiger 2', get max() { return S.settings.maxTravail; } },
+    t1: { label: 'Contrôle 1', max: 20 }, t2: { label: 'Contrôle 2', max: 20 },
   };
+  /** Number of sessions a student was marked absent (from the seating plan / gradebook). */
+  function absCount(sid) {
+    const c = S.classes.find(k => k.students.some(x => x.id === sid));
+    return c ? Object.values(S.absences[c.id] || {}).filter(l => l.includes(sid)).length : 0;
+  }
+  const grades = sid => computeGrades(gr(sid), S.settings, absCount(sid));
   function bump(sid, f, delta, why) {
     const g = gr(sid);
     const old = +g[f] || 0;
-    const nv = Math.round(CK.clamp(old + delta, 0, FIELDS[f].max) * 100) / 100;
+    const nv = Math.round(CK.clamp(old + delta, FIELDS[f].min || 0, FIELDS[f].max) * 100) / 100;
     if (nv === old) return false;
     g[f] = nv;
     (S.log[sid] = S.log[sid] || []).push({ t: Date.now(), f, d: Math.round((nv - old) * 100) / 100, v: nv, why: why || '' });
@@ -192,7 +202,7 @@
       if (!s) { cells += `<div class="seat empty ${picked === key ? 'pick' : ''}" data-seat="${key}">${mode === 'arrange' ? '+' : ''}</div>`; continue; }
       const isAbs = abs.has(s.id), g = gr(s.id);
       cells += `<div class="seat ${isAbs ? 'abs' : ''} ${picked === s.id ? 'pick' : ''}" data-sid="${s.id}" data-seat="${key}">
-        ${mode === 'points' ? `<span class="pts">${fmt(computeGrades(g, S.settings).oral, 1)}</span>` : ''}
+        ${mode === 'points' ? `<span class="pts">${fmt(grades(s.id).act, 1)}</span>` : ''}
         <div class="num">${s.n}</div><div class="nm ar">${esc(name(s))}</div>
         <div class="st">${isAbs ? 'Absent' : 'Present'} · ${s.g === 'F' ? 'Girl' : 'Boy'}</div></div>`;
     }
@@ -208,7 +218,7 @@
       </div>
       <p class="small muted noprint">${{
         attendance: 'Tap a seat to switch it between present and absent (red). An empty table = an absent student.',
-        points: 'Tap a student to add or remove participation / discipline points. Students see every change in their portal.',
+        points: 'Tap a student to add or remove points (participation, cahier, travail à rédiger). Students see every change in their portal.',
         arrange: 'Tap a student, then tap an empty seat (move) or another student (swap). Tap a seated student then "Unseated" to remove.',
       }[mode]}</p>
       <div class="seats ${S.settings.blurNames ? 'blur' : ''}" style="grid-template-columns:repeat(${c.cols},minmax(0,1fr))">${cells}</div>
@@ -271,20 +281,24 @@
   }
 
   const REASONS = {
-    part: ['Great answer', 'Volunteered', 'Helped a classmate', 'Did the homework', 'Spoke English'],
-    disc: ['Talking during explanation', 'Late', 'Phone', 'Disturbing', 'No copybook', 'Back to good behaviour'],
+    part: ['Bonne réponse', 'Participation spontanée', 'Passage au tableau', 'Aide un camarade', 'Devoir fait', 'Bavardage', 'Pas de participation', 'Retard', 'Téléphone', 'Perturbe la classe'],
+    cb1: ['Cahier bien organisé', 'Cours complet', 'Cours incomplet', 'Cahier absent', 'Cahier mal tenu'],
+    tr1: ['Travail rendu', 'Travail soigné', 'Travail incomplet', 'Travail non rendu', 'Travail copié'],
   };
   function pointsDialog(sid) {
     const s = stuById(sid);
+    const st = S.settings;
     const draw = () => {
-      const g = gr(sid), cg = computeGrades(g, S.settings);
+      const g = gr(sid), cg = grades(sid);
       const recent = (S.log[sid] || []).slice(-4).reverse();
       return `<h3><span class="ar">${esc(name(s))}</span> <span class="muted">· No. ${s.n}</span></h3>
-        <div class="quick"><span>Participation /10</span>${stepper('part', g.part)}</div>
-        <div class="reasons" data-f="part">${REASONS.part.map(r => `<button>${r}</button>`).join('')}</div>
-        <div class="quick"><span>Discipline /5</span>${stepper('disc', g.disc)}</div>
-        <div class="reasons" data-f="disc">${REASONS.disc.map(r => `<button>${r}</button>`).join('')}</div>
-        <p class="small muted">Tap a reason first to attach it to the next +/−. Oral now: <b>${fmt(cg.oral)}/20</b></p>
+        <div class="quick"><span>Participation /${st.maxPart}</span>${stepper('part', g.part)}</div>
+        <div class="reasons">${REASONS.part.map(r => `<button>${r}</button>`).join('')}</div>
+        <div class="quick"><span>Organisation du cahier /${st.maxCahier}</span>${stepper('cb1', g.cb1)}</div>
+        <div class="reasons">${REASONS.cb1.map(r => `<button>${r}</button>`).join('')}</div>
+        <div class="quick"><span>Travail à rédiger /${st.maxTravail}</span>${stepper('tr1', g.tr1)}</div>
+        <div class="reasons">${REASONS.tr1.map(r => `<button>${r}</button>`).join('')}</div>
+        <p class="small muted">Tap a reason first to attach it to the next +/−. Absence: <b>${fmt(cg.absence)}/${st.maxAbs}</b> (${cg.nAbs} séance(s)) · Activités intégrées: <b>${fmt(cg.act)}/20</b></p>
         <div class="small">${recent.map(logLine).join('<br>') || '<span class="muted">No changes yet.</span>'}</div>
         <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn pri" id="pd">Done</button></div>`;
     };
@@ -307,21 +321,23 @@
       mount();
     });
   }
-  function stepper(f, v, sid) {
-    return `<span class="step" data-f="${f}" ${sid ? `data-sid="${sid}"` : ''}><button class="m" aria-label="minus">−</button><span>${fmt(+v || 0)}</span><button class="p" aria-label="plus">+</button></span>`;
+  function stepper(f, v, shown) {
+    return `<span class="step" data-f="${f}"><button class="m" aria-label="minus">−</button><span>${fmt(shown != null ? shown : (+v || 0))}</span><button class="p" aria-label="plus">+</button></span>`;
   }
   function logLine(e) {
-    const when = new Date(e.t).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-    const what = e.set !== undefined ? `set to ${e.set === '' ? '—' : e.set}` : `${e.d > 0 ? '+' : ''}${e.d}`;
-    return `<span class="muted">${when}</span> · ${FIELDS[e.f] ? FIELDS[e.f].label : e.f} <b style="color:${e.d < 0 ? 'var(--bad)' : 'var(--ok)'}">${what}</b>${e.why ? ' — ' + esc(e.why) : ''}`;
+    const when = new Date(e.t).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const what = e.set !== undefined ? `= ${e.set === '' ? '—' : e.set}` : `${e.d > 0 ? '+' : ''}${e.d}`;
+    return `<span class="muted">${when}</span> · ${FIELDS[e.f] ? FIELDS[e.f].label : esc(e.f)} <b style="color:${e.d < 0 ? 'var(--bad)' : 'var(--ok)'}">${what}</b>${e.why ? ' — ' + esc(e.why) : ''}`;
   }
 
   // ───────────────────────── gradebook ─────────────────────────
   function renderGrades(v) {
     const c = cls();
+    const st = S.settings;
     const abs = new Set(absentOn(c, S.ui.date));
-    const dlabel = new Date(S.ui.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const one = S.settings.copybookChecks === 1;
+    const dlabel = new Date(S.ui.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    const cb2 = st.cahierChecks === 2, tr2 = st.travailCount === 2;
+    const nCols = 2 + (cb2 ? 2 : 1) + (tr2 ? 2 : 1);
     v.innerHTML = `
       <div class="row noprint" style="margin-bottom:10px">
         <input type="date" id="date" value="${S.ui.date}">
@@ -331,12 +347,15 @@
         <button class="btn sm" id="print">Print</button>
       </div>
       <div class="tablewrap"><table class="gb"><thead>
-        <tr><th rowspan="2">Student name &amp; actions</th><th rowspan="2">Absent<br><span class="small" style="font-weight:400">${dlabel}</span></th>
-          <th colspan="${one ? 3 : 4}">Oral assessment · /20</th><th rowspan="2">Note (visible to student)</th><th rowspan="2">Oral /20</th>
-          <th rowspan="2">Test 1<br>/20</th><th rowspan="2">Pres. 1<br>/5</th><th rowspan="2">Test 2<br>/20</th><th rowspan="2">Pres. 2<br>/5</th><th rowspan="2">Final grade<br>/20</th></tr>
-        <tr><th>Participation · /10</th><th>Discipline · /5</th>${one ? '<th>Copybook · /5</th>' : '<th>Copybook 1 · /5</th><th>Copybook 2 · /5</th>'}</tr>
-      </thead><tbody>${c.students.map(s => gradeRow(s, abs.has(s.id), one)).join('')}</tbody></table></div>
-      <p class="small muted">Oral = participation + discipline + copybook${one ? '' : ' (average of the two checks)'}. Presentation points are added to the test as a bonus (×${S.settings.presFactor}, capped at 20). Final = average of Test 1, Test 2 and Oral. Change these in Settings.</p>`;
+        <tr><th rowspan="2">Élève</th><th rowspan="2">Absent<br><span class="small" style="font-weight:400">${dlabel}</span></th>
+          <th colspan="${nCols}">Activités intégrées · /20</th><th rowspan="2">Remarque (visible par l’élève)</th><th rowspan="2">Activités<br>/20</th>
+          <th rowspan="2">Contrôle 1<br>/20</th><th rowspan="2">Contrôle 2<br>/20</th><th rowspan="2">Note finale<br>/20</th></tr>
+        <tr><th>Participation · /${st.maxPart}</th><th>Absence · /${st.maxAbs}</th>
+          ${cb2 ? `<th>Cahier (1) · /${st.maxCahier}</th><th>Cahier (2) · /${st.maxCahier}</th>` : `<th>Organisation du cahier · /${st.maxCahier}</th>`}
+          ${tr2 ? `<th>Travail à rédiger 1 · /${st.maxTravail}</th><th>Travail à rédiger 2 · /${st.maxTravail}</th>` : `<th>Travail à rédiger · /${st.maxTravail}</th>`}</tr>
+      </thead><tbody>${c.students.map(s => gradeRow(s, abs.has(s.id), cb2, tr2)).join('')}</tbody></table></div>
+      <p class="small muted">Activités intégrées = participation + absence + organisation du cahier${cb2 ? ' (moyenne des 2 contrôles)' : ''} + travail à rédiger${tr2 ? ' (moyenne des 2 travaux)' : ''}${st.maxPart + st.maxAbs + st.maxCahier + st.maxTravail !== 20 ? ', ramené sur 20' : ''}.
+        Absence = ${st.maxAbs} − ${st.absPenalty} par séance d’absence non justifiée (± ajustement avec les boutons, ex. absence justifiée). Note finale = moyenne de Contrôle 1, Contrôle 2 et Activités. Barème modifiable dans Settings.</p>`;
 
     $('#date').onchange = e => { S.ui.date = e.target.value || today(); save(); render(); };
     $('#q').oninput = e => {
@@ -351,58 +370,56 @@
       const tr = e.target.closest('tr');
       if (b) {
         const f = b.closest('.step').dataset.f;
-        bump(tr.dataset.sid, f, (b.classList.contains('p') ? 1 : -1) * (f === 'p1' || f === 'p2' ? 0.5 : S.settings.step));
+        const why = f === 'absAdj' ? (b.classList.contains('p') ? 'Absence justifiée / régularisée' : 'Ajustement absence') : '';
+        bump(tr.dataset.sid, f, (b.classList.contains('p') ? 1 : -1) * S.settings.step, why);
         return refreshRow(tr);
       }
       if (e.target.closest('[data-act=hist]')) historyDialog(tr.dataset.sid);
     });
     tb.addEventListener('change', e => {
       const tr = e.target.closest('tr'), sid = tr.dataset.sid;
-      if (e.target.matches('.absbox')) { setAbsent(c, sid, e.target.checked); tr.classList.toggle('isabs', e.target.checked); }
+      if (e.target.matches('.absbox')) { setAbsent(c, sid, e.target.checked); tr.classList.toggle('isabs', e.target.checked); refreshRow(tr); }
       if (e.target.matches('input.score')) { setScore(sid, e.target.dataset.f, e.target.value); refreshRow(tr); }
     });
     tb.addEventListener('input', e => {
       if (e.target.matches('textarea')) { gr(e.target.closest('tr').dataset.sid).note = e.target.value; save(); }
     });
   }
-  function gradeRow(s, isAbs, one) {
-    const g = gr(s.id), cg = computeGrades(g, S.settings);
+  function gradeRow(s, isAbs, cb2, tr2) {
+    const g = gr(s.id), cg = grades(s.id);
     return `<tr data-sid="${s.id}" data-k="${esc((s.n + ' ' + name(s)).toLowerCase())}" class="${isAbs ? 'isabs' : ''}">
-      <td class="name"><button class="btn sm" data-act="hist" title="History">⏱</button> <span class="n">${s.n}</span> <span class="ar">${esc(name(s))}</span></td>
+      <td class="name"><button class="btn sm" data-act="hist" title="Historique">⏱</button> <span class="n">${s.n}</span> <span class="ar">${esc(name(s))}</span></td>
       <td><input type="checkbox" class="absbox" ${isAbs ? 'checked' : ''}></td>
-      <td>${stepper('part', g.part)}</td><td>${stepper('disc', g.disc)}</td>
-      <td>${stepper('cb1', g.cb1)}</td>${one ? '' : `<td>${stepper('cb2', g.cb2)}</td>`}
-      <td><textarea placeholder="Add a note">${esc(g.note)}</textarea></td>
-      <td><span class="oral ${cg.oral >= 10 ? 'good' : ''}" data-o>${fmt(cg.oral)}</span></td>
+      <td>${stepper('part', g.part)}</td>
+      <td>${stepper('absAdj', g.absAdj, cg.absence)}<div class="bonus" data-na>${cg.nAbs} abs.</div></td>
+      <td>${stepper('cb1', g.cb1)}</td>${cb2 ? `<td>${stepper('cb2', g.cb2)}</td>` : ''}
+      <td>${stepper('tr1', g.tr1)}</td>${tr2 ? `<td>${stepper('tr2', g.tr2)}</td>` : ''}
+      <td><textarea placeholder="Ajouter une remarque">${esc(g.note)}</textarea></td>
+      <td><span class="oral ${cg.act >= 10 ? 'good' : ''}" data-o>${fmt(cg.act)}</span></td>
       <td><input class="score" data-f="t1" type="number" min="0" max="20" step="0.25" placeholder="/20" value="${g.t1}"></td>
-      <td>${stepper('p1', g.p1)}<div class="bonus" data-b1>+${fmt(cg.b1)}</div></td>
       <td><input class="score" data-f="t2" type="number" min="0" max="20" step="0.25" placeholder="/20" value="${g.t2}"></td>
-      <td>${stepper('p2', g.p2)}<div class="bonus" data-b2>+${fmt(cg.b2)}</div></td>
       <td class="final" data-fin>${fmt(cg.final)}</td></tr>`;
   }
   function refreshRow(tr) {
-    const g = gr(tr.dataset.sid), cg = computeGrades(g, S.settings);
-    $$('.step', tr).forEach(st => { $('span', st).textContent = fmt(+g[st.dataset.f] || 0); });
-    const o = $('[data-o]', tr); o.textContent = fmt(cg.oral); o.classList.toggle('good', cg.oral >= 10);
-    $('[data-b1]', tr).textContent = '+' + fmt(cg.b1);
-    $('[data-b2]', tr).textContent = '+' + fmt(cg.b2);
+    const g = gr(tr.dataset.sid), cg = grades(tr.dataset.sid);
+    $$('.step', tr).forEach(st => { $('span', st).textContent = fmt(st.dataset.f === 'absAdj' ? cg.absence : (+g[st.dataset.f] || 0)); });
+    $('[data-na]', tr).textContent = cg.nAbs + ' abs.';
+    const o = $('[data-o]', tr); o.textContent = fmt(cg.act); o.classList.toggle('good', cg.act >= 10);
     $('[data-fin]', tr).textContent = fmt(cg.final);
   }
   function historyDialog(sid) {
     const s = stuById(sid);
     const l = (S.log[sid] || []).slice().reverse();
-    dialog(`<h3><span class="ar">${esc(name(s))}</span> · history</h3><div class="small" style="line-height:1.9">${l.map(logLine).join('<br>') || '<span class="muted">Nothing yet.</span>'}</div>
+    dialog(`<h3><span class="ar">${esc(name(s))}</span> · historique</h3><div class="small" style="line-height:1.9">${l.map(logLine).join('<br>') || '<span class="muted">Rien pour l’instant.</span>'}</div>
       <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn pri" id="hx">Close</button></div>`, (d, close) => { $('#hx', d).onclick = close; });
   }
   function exportCsv(c) {
-    const head = ['No', 'Code', 'Name', 'Participation', 'Discipline', 'Copybook', 'Oral', 'Test1', 'Pres1', 'Test2', 'Pres2', 'Final', 'Absences', 'Note'];
-    const allAbs = S.absences[c.id] || {};
+    const head = ['N°', 'Code Massar', 'Nom', 'Participation', 'Absences (séances)', 'Absence', 'Cahier', 'Travail à rédiger', 'Activités /20', 'Contrôle 1', 'Contrôle 2', 'Note finale', 'Remarque'];
     const lines = c.students.map(s => {
-      const g = gr(s.id), cg = computeGrades(g, S.settings);
-      const nAbs = Object.values(allAbs).filter(l => l.includes(s.id)).length;
-      return [s.n, s.code, name(s), g.part, g.disc, fmt(cg.copybook), fmt(cg.oral), g.t1, g.p1, g.t2, g.p2, fmt(cg.final), nAbs, g.note];
+      const g = gr(s.id), cg = grades(s.id);
+      return [s.n, s.code, name(s), g.part, cg.nAbs, fmt(cg.absence), fmt(cg.cahier), fmt(cg.travail), fmt(cg.act), g.t1, g.t2, fmt(cg.final), g.note];
     });
-    download(`${c.name}-grades.csv`, '﻿' + [head, ...lines].map(r => r.map(x => `"${String(x == null ? '' : x).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv');
+    download(`${c.name}-notes.csv`, '﻿' + [head, ...lines].map(r => r.map(x => `"${String(x == null ? '' : x).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv');
   }
   function download(fname, text, type) {
     const a = document.createElement('a');
@@ -425,7 +442,9 @@
           <div class="panel">
             <div class="row"><input type="text" id="cq" placeholder="Question (optional, shown on screen)" value="${esc(live.q)}" style="flex:1">
               <label class="f">Correct<select id="cc"><option value="">?</option>${'ABCD'.split('').map(l => `<option ${live.correct === l ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
-            <div class="bigq ar" id="bq"></div>
+            <div class="row" style="margin-top:8px"><select id="cbank" style="flex:1"><option value="">— Banque de questions SVT —</option>${(window.CK_BANKS || []).map(b => `<option value="${b.id}" ${live.bank === b.id ? 'selected' : ''}>${esc(b.level + ' · ' + b.title)} (${b.questions.length})</option>`).join('')}</select>
+              <button class="btn sm" id="cnext">Question suivante ▸</button></div>
+            <div class="bigq ar" id="bq"></div><div id="bch" class="ar" style="display:grid;gap:6px;max-width:720px;margin:0 auto 8px;font-size:19px"></div>
             <div class="scanwrap hidden" id="sw"><video id="vid"></video><canvas id="ov"></canvas></div>
             <div class="row" style="margin-top:10px">
               <button class="btn acc" id="cam">📷 Start scanning</button>
@@ -453,7 +472,19 @@
         </div>
       </div>`;
     drawLive(c);
-    $('#cq').oninput = e => { live.q = e.target.value; drawLive(c); };
+    $('#cq').oninput = e => { live.q = e.target.value; live.choices = null; drawLive(c); };
+    $('#cbank').onchange = e => { live.bank = e.target.value; live.bankPos = -1; };
+    $('#cnext').onclick = () => {
+      const b = (window.CK_BANKS || []).find(x => x.id === $('#cbank').value);
+      if (!b) return toast('Choose a question bank first');
+      if (live.bank !== b.id) { live.bank = b.id; live.bankPos = -1; }
+      if (Object.keys(live.answers).length && !confirm('Start the next question? Answers of the current one are not saved yet (Save result).')) return;
+      live.bankPos = ((live.bankPos == null ? -1 : live.bankPos) + 1) % b.questions.length;
+      const q = b.questions[live.bankPos];
+      // QR cards have 4 sides: keep at most 4 choices
+      Object.assign(live, { q: q.q, choices: q.c.slice(0, 4), correct: 'ABCD'[q.a] || '', answers: {}, reveal: false });
+      $('#cq').value = q.q; $('#cc').value = live.correct; drawLive(c);
+    };
     $('#cc').onchange = e => { live.correct = e.target.value; drawLive(c); };
     $('#aw').onchange = e => { live.award = +e.target.value || 0; };
     $('#rev').onclick = () => { live.reveal = !live.reveal; drawLive(c); };
@@ -463,8 +494,11 @@
     $('#savec').onclick = () => {
       if (!Object.keys(live.answers).length) return toast('No answer scanned yet');
       S.cardSessions.push({ id: uid(), classId: c.id, date: today(), q: live.q, correct: live.correct, answers: live.answers });
-      if (live.award && live.correct) Object.entries(live.answers).forEach(([sid, a]) => { if (a === live.correct) bump(sid, 'part', live.award, 'QR card quiz: correct answer'); });
-      save(); toast('Saved'); stopScan(); live = null; render();
+      if (live.award && live.correct) Object.entries(live.answers).forEach(([sid, a]) => { if (a === live.correct) bump(sid, 'part', live.award, 'Cartes QR : bonne réponse'); });
+      save(); toast('Saved');
+      // keep the camera running and the bank position, ready for the next question
+      Object.assign(live, { answers: {}, reveal: false });
+      drawLive(c);
     };
     $('#cam').onclick = async () => {
       const btn = $('#cam');
@@ -495,6 +529,7 @@
     Object.values(live.answers).forEach(a => counts[a]++);
     const total = Object.keys(live.answers).length;
     $('#bq').textContent = live.q;
+    $('#bch').innerHTML = (live.choices || []).map((t, i) => `<div><b>${'ABCD'[i]}.</b> ${esc(t)}</div>`).join('');
     $('#rev').textContent = live.reveal ? 'Hide answers' : 'Reveal answers';
     $('#ansPanel').innerHTML = `<div class="row"><strong>${total}/${c.students.length - abs.size} answered</strong><span class="spacer"></span><span class="small muted">numbers turn green when read</span></div>
       <div class="answered" style="margin-top:8px">${c.students.map(s => {
@@ -586,10 +621,20 @@
         <p class="small muted">One block per question, separated by an empty line. First line = the question, next lines = choices. Put <b>*</b> before the correct choice.</p>
         <textarea id="qq" rows="16" class="ar" placeholder="Choose the correct word: She ___ to school every day.\n*goes\ngo\ngoing\ngone\n\nThe opposite of 'cheap' is:\nfree\n*expensive\nsmall\neasy">${esc(qToText(q.questions))}</textarea>
         <p class="small" id="qn"></p>
-        <button class="btn sm" id="qpaper">Print paper version (with anti-AI line)</button>
+        <div class="row"><select id="qbank"><option value="">— Banque de questions SVT —</option>${(window.CK_BANKS || []).map(b => `<option value="${b.id}">${esc(b.level + ' · ' + b.title)} (${b.questions.length})</option>`).join('')}</select>
+          <button class="btn sm" id="qbadd">Add these questions</button><span class="spacer"></span>
+          <button class="btn sm" id="qpaper">Print paper version (with anti-AI line)</button></div>
       </div>`;
     const count = () => { const n = textToQ($('#qq').value).length; $('#qn').textContent = n + ' question(s) detected'; };
     $('#qq').oninput = count; count();
+    $('#qbadd').onclick = () => {
+      const b = (window.CK_BANKS || []).find(x => x.id === $('#qbank').value);
+      if (!b) return toast('Choose a bank');
+      const cur = $('#qq').value.trim();
+      $('#qq').value = (cur ? cur + '\n\n' : '') + qToText(b.questions);
+      if (!$('#qt').value.trim()) $('#qt').value = b.title.replace(/^.*— /, '');
+      count();
+    };
     const collect = () => {
       q.title = $('#qt').value.trim() || 'Quiz'; q.code = CK.normSecret($('#qc').value) || randomCode(5);
       q.perStudent = +$('#qp').value || 0; q.minutes = +$('#qm').value || 15; q.outOf = +$('#qo').value || 20; q.aiGuard = $('#qa').value;
@@ -625,7 +670,7 @@
         const r = res[s.id];
         return `<tr><td>${s.n}</td><td class="ar">${esc(name(s))}</td><td>${r ? `<b>${fmt(r.score)}</b>/${q.outOf}` : '—'}</td><td>${r ? (r.status === 'done' ? '<span class="pill ok">finished</span>' : r.status === 'timeup' ? '<span class="pill warn">time up</span>' : `<span class="pill bad">removed${r.reason ? ': ' + esc(r.reason) : ''}</span>`) : '<span class="pill">no result</span>'}</td></tr>`;
       }).join('')}</tbody></table>
-      <div class="row" style="margin-top:10px"><label class="small row">Copy scores into <select id="rto"><option value="">—</option><option value="t1">Test 1</option><option value="t2">Test 2</option></select></label><button class="btn sm" id="rcopy">Copy</button><span class="spacer"></span><button class="btn pri" id="rx">Close</button></div>`;
+      <div class="row" style="margin-top:10px"><label class="small row">Copy scores into <select id="rto"><option value="">—</option><option value="t1">Contrôle 1</option><option value="t2">Contrôle 2</option></select></label><button class="btn sm" id="rcopy">Copy</button><span class="spacer"></span><button class="btn pri" id="rx">Close</button></div>`;
     dialog('', (d, close) => {
       const mount = () => {
         d.innerHTML = draw();
@@ -728,7 +773,7 @@
       const absDates = Object.entries(S.absences[c.id] || {}).filter(([, l]) => l.includes(s.id)).map(([d]) => d).sort();
       const cards = S.cardSessions.filter(x => x.classId === c.id).map(x => ({ date: x.date, q: x.q, a: x.answers[s.id] || null, ok: x.correct || null }));
       const quizzes = S.quizzes.filter(q => q.classIds.includes(c.id) && (S.quizResults[q.id] || {})[s.id]).map(q => { const r = S.quizResults[q.id][s.id]; return { title: q.title, score: r.score, outOf: q.outOf, status: r.status, reason: r.reason }; });
-      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: computeGrades(g, S.settings), cfg: { copybookChecks: S.settings.copybookChecks, presFactor: S.settings.presFactor }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
+      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: grades(s.id), cfg: { maxPart: S.settings.maxPart, maxAbs: S.settings.maxAbs, maxCahier: S.settings.maxCahier, maxTravail: S.settings.maxTravail, absPenalty: S.settings.absPenalty, cahierChecks: S.settings.cahierChecks, travailCount: S.settings.travailCount }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
       out.records[c.id + ':' + s.n] = await CK.seal(rec, s.pin);
       progress && progress(++i, all.length);
     }
@@ -789,24 +834,31 @@
         <label class="f">School<input type="text" id="s_school" class="ar" value="${esc(st.school)}"></label>
         <label class="f">Subject<input type="text" id="s_subject" value="${esc(st.subject)}"></label>
         <label class="f">School year<input type="text" id="s_year" value="${esc(st.year)}"></label>
-        <label class="f">Discipline starts at (for new students)<input type="number" id="s_discStart" min="0" max="5" step="0.5" value="${st.discStart}"></label>
-        <label class="f">+/− step for participation, discipline, copybook<input type="number" id="s_step" min="0.25" max="2" step="0.25" value="${st.step}"></label>
-        <label class="f">Copybook checks<select id="s_copybookChecks"><option value="2" ${st.copybookChecks === 2 ? 'selected' : ''}>Two checks (average)</option><option value="1" ${st.copybookChecks === 1 ? 'selected' : ''}>One check</option></select></label>
-        <label class="f">Presentation bonus multiplier (bonus = points × this)<input type="number" id="s_presFactor" min="0" max="4" step="0.01" value="${st.presFactor}"></label>
+        <label class="f">+/− step<input type="number" id="s_step" min="0.25" max="2" step="0.25" value="${st.step}"></label>
+      </div>
+      <div class="panel"><strong>Barème des activités intégrées</strong>
+        <p class="small muted">Si le total des maxima n’est pas 20, la note des activités est ramenée sur 20 automatiquement.</p>
+        <div class="grid2">
+        <label class="f">Participation — max<input type="number" id="s_maxPart" min="1" max="20" step="0.5" value="${st.maxPart}"></label>
+        <label class="f">Absence — max<input type="number" id="s_maxAbs" min="1" max="20" step="0.5" value="${st.maxAbs}"></label>
+        <label class="f">Points retirés par séance d’absence<input type="number" id="s_absPenalty" min="0" max="5" step="0.25" value="${st.absPenalty}"></label>
+        <label class="f">Organisation du cahier — max<input type="number" id="s_maxCahier" min="1" max="20" step="0.5" value="${st.maxCahier}"></label>
+        <label class="f">Contrôles du cahier<select id="s_cahierChecks"><option value="2" ${st.cahierChecks === 2 ? 'selected' : ''}>2 contrôles (moyenne)</option><option value="1" ${st.cahierChecks === 1 ? 'selected' : ''}>1 contrôle</option></select></label>
+        <label class="f">Travail à rédiger — max<input type="number" id="s_maxTravail" min="1" max="20" step="0.5" value="${st.maxTravail}"></label>
+        <label class="f">Nombre de travaux à rédiger<select id="s_travailCount"><option value="2" ${st.travailCount === 2 ? 'selected' : ''}>2 travaux (moyenne)</option><option value="1" ${st.travailCount === 1 ? 'selected' : ''}>1 travail</option></select></label>
+        </div>
       </div>
       <div class="panel"><strong>Backup</strong><p class="small muted">Everything lives in this browser. Download a backup every week (USB key, e-mail to yourself…). The backup contains names and PINs: keep it private.</p>
         <div class="row"><button class="btn pri" id="bk">Download backup</button><label class="btn">Restore backup…<input type="file" id="rs" accept=".json" hidden></label>
         <label class="btn">Import roster file…<input type="file" id="rf" accept=".json" hidden></label>
-        <button class="btn" id="resetDisc">Reset discipline of everyone to ${st.discStart}</button>
         <span class="spacer"></span><button class="btn danger" id="wipe">Erase all data</button></div></div>`;
     $$('[id^=s_]', v).forEach(el => el.onchange = () => {
       const k = el.id.slice(2);
-      st[k] = el.type === 'number' || k === 'copybookChecks' ? +el.value : el.value; save();
+      st[k] = el.type === 'number' || el.tagName === 'SELECT' ? +el.value : el.value; save();
     });
     $('#bk').onclick = () => download(`classkit-backup-${today()}.json`, JSON.stringify(S));
     $('#rs').onchange = e => readJsonFile(e.target.files[0], d => { if (d.v && d.classes && confirm('Replace everything in this browser with this backup?')) restore(d); });
     $('#rf').onchange = e => readJsonFile(e.target.files[0], d => importRoster(d));
-    $('#resetDisc').onclick = () => { if (confirm('Set discipline back to ' + st.discStart + ' for every student?')) { S.classes.forEach(c => c.students.forEach(s => { gr(s.id).disc = st.discStart; })); save(); toast('Done'); } };
     $('#wipe').onclick = () => { if (confirm('Erase ALL classes, grades and quizzes from this browser?') && confirm('Really? Download a backup first if unsure.')) { S = blank(); save(); render(); } };
   }
 
