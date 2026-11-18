@@ -6,6 +6,8 @@ pour les établissements scolaires marocains, année scolaire **2026/2027**.
 > Lycée Qualifiant Tilmi — Direction Provinciale de Tinghir — AREF Drâa-Tafilalet
 > Pr. Omari Mohammed
 
+> **Nouveau : [ClassKit](classkit/README.md)** — notes des activités intégrées, plan de classe et absences, cartes QR, quiz sur téléphone anti-triche et portail élèves par PIN (`classkit/`).
+
 ---
 
 ## 1. Démarrer

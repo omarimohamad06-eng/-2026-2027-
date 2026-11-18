@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My grades — ClassKit</title>
+<meta name="theme-color" content="#1f1d1a">
+<link rel="stylesheet" href="css/ck.css">
+<style>
+  main{max-width:640px}
+  .big{font-size:34px;font-weight:800}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+  .kpi b{display:block;font-size:22px}
+  .meter{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:4px}
+  .meter i{display:block;height:100%;background:var(--accent)}
+  .line{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin:10px 0}
+  .ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #eee7da;font-size:14px}
+  .ev .d{font-weight:800;min-width:44px;text-align:center;border-radius:8px;padding:2px 0}
+  .ev .d.p{background:var(--ok-pale);color:var(--ok)} .ev .d.m{background:var(--bad-pale);color:var(--bad)} .ev .d.s{background:var(--accent-pale);color:var(--accent)}
+  .note{background:#fffbea;border:1px solid #f1e1a6;border-radius:12px;padding:10px 12px;white-space:pre-wrap}
+  .pinin{font:700 22px ui-monospace,monospace;letter-spacing:.25em;text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><i>✦</i>My grades</div><span class="spacer"></span><a href="quiz.html" class="btn sm">Quiz</a><button class="btn sm hidden" id="out">Log out</button></header>
+<main id="m"><div class="panel">Loading…</div></main>
+<script src="js/shared.js"></script>
+<script>
+(function () {
+  const { esc, fmt } = CK;
+  const m = document.getElementById('m');
+  const MEM = 'classkit.portal.login';
+  let data;
+  const FL = { part: 'Participation', disc: 'Discipline', cb1: 'Copybook check 1', cb2: 'Copybook check 2', p1: 'Presentation 1', p2: 'Presentation 2', t1: 'Test 1', t2: 'Test 2' };
+
+  async function load() {
+    try {
+      const r = await fetch('data/portal.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      data = await r.json();
+    } catch (e) {
+      m.innerHTML = '<div class="panel">Your teacher has not published grades yet. Try again later.</div>';
+      return;
+    }
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(MEM) || 'null'); } catch (e) {}
+    if (saved) { if (!(await tryOpen(saved.c, saved.n, saved.p, false))) loginForm(); }
+    else loginForm();
+  }
+
+  function loginForm(err) {
+    document.getElementById('out').classList.add('hidden');
+    m.innerHTML = `<div class="panel">
+      <h2>Log in</h2>
+      <p class="muted small">${esc(data.subject || '')} ${data.teacher ? '· ' + esc(data.teacher) : ''} · ${esc(data.year || '')}</p>
+      <label class="f">Class<select id="c">${data.classes.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label><br>
+      <label class="f">Your number in the class list<input type="number" id="n" min="1" inputmode="numeric"></label><br>
+      <label class="f">PIN (on the paper from your teacher)<input type="text" id="p" class="pinin" maxlength="8" autocomplete="off" autocapitalize="characters"></label>
+      <label class="row small" style="margin-top:10px"><input type="checkbox" id="rem" checked> Remember me on this phone</label>
+      ${err ? `<p style="color:var(--bad)">${esc(err)}</p>` : ''}
+      <button class="btn pri" id="go" style="width:100%;margin-top:12px;padding:12px">Open my grades</button></div>`;
+    document.getElementById('go').onclick = async () => {
+      const b = document.getElementById('go'); b.disabled = true; b.textContent = 'Checking…';
+      const ok = await tryOpen(document.getElementById('c').value, +document.getElementById('n').value, document.getElementById('p').value, document.getElementById('rem').checked);
+      if (!ok) loginForm('Wrong number or PIN.');
+    };
+  }
+
+  async function tryOpen(c, n, p, remember) {
+    const box = data.records[c + ':' + n];
+    if (!box || !p) return false;
+    try {
+      const rec = await CK.open(box, p);
+      if (remember) localStorage.setItem(MEM, JSON.stringify({ c, n, p }));
+      show(rec);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function meter(v, max) { return `<div class="meter"><i style="width:${Math.max(0, Math.min(100, (v || 0) / max * 100))}%"></i></div>`; }
+  function show(r) {
+    const out = document.getElementById('out');
+    out.classList.remove('hidden');
+    out.onclick = () => { localStorage.removeItem(MEM); loginForm(); };
+    const g = r.g, k = r.comp;
+    const log = (r.log || []).slice().reverse();
+    m.innerHTML = `
+      <div class="panel"><div class="row"><div><div class="ar" style="font-size:20px;font-weight:800">${esc(r.name)}</div><div class="muted small">${esc(r.cls)} · No. ${r.n}</div></div><span class="spacer"></span>
+        <div style="text-align:center"><div class="big">${fmt(k.final)}</div><div class="small muted">final /20</div></div></div></div>
+      <div class="kpis"><div class="kpi"><b>${fmt(k.oral)}</b><span class="small muted">Oral /20</span></div><div class="kpi"><b>${fmt(k.t1)}</b><span class="small muted">Test 1</span></div><div class="kpi"><b>${fmt(k.t2)}</b><span class="small muted">Test 2</span></div></div>
+      <div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Oral assessment (integrated activities)</h3>
+        <div class="line"><span>Participation</span><b>${fmt(+g.part || 0)} / 10</b></div>${meter(g.part, 10)}
+        <div class="line"><span>Discipline</span><b>${fmt(+g.disc || 0)} / 5</b></div>${meter(g.disc, 5)}
+        <div class="line"><span>Copybook${r.cfg.copybookChecks === 1 ? '' : ` <span class="small muted">(checks: ${fmt(+g.cb1 || 0)} and ${fmt(+g.cb2 || 0)})</span>`}</span><b>${fmt(k.copybook)} / 5</b></div>${meter(k.copybook, 5)}
+        ${(+g.p1 || +g.p2) ? `<div class="line"><span>Presentation bonus</span><b>+${fmt(k.b1)} (Test 1) · +${fmt(k.b2)} (Test 2)</b></div>` : ''}
+      </div>
+      ${g.note ? `<div class="panel"><h3 style="margin-top:0">Teacher's feedback</h3><div class="note ar">${esc(g.note)}</div></div>` : ''}
+      <div class="panel"><h3 style="margin-top:0">Every change to your grade</h3>
+        ${log.map(e => {
+          const set = e.set !== undefined;
+          const cls = set ? 's' : (e.d > 0 ? 'p' : 'm');
+          return `<div class="ev"><span class="d ${cls}">${set ? (e.set === '' ? '—' : e.set) : (e.d > 0 ? '+' : '') + e.d}</span><span><b>${FL[e.f] || e.f}</b>${e.why ? ' — ' + esc(e.why) : ''}<br><span class="small muted">${new Date(e.t).toLocaleString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></span></div>`;
+        }).join('') || '<p class="muted">No change yet.</p>'}
+      </div>
+      ${r.quizzes && r.quizzes.length ? `<div class="panel"><h3 style="margin-top:0">Quizzes</h3>${r.quizzes.map(q => `<div class="line"><span>${esc(q.title)} ${q.status !== 'done' ? `<span class="pill ${q.status === 'timeup' ? 'warn' : 'bad'}">${q.status === 'timeup' ? 'time up' : 'removed'}</span>` : ''}</span><b>${fmt(q.score)} / ${q.outOf}</b></div>`).join('')}</div>` : ''}
+      ${r.cards && r.cards.length ? `<div class="panel"><h3 style="margin-top:0">QR card questions</h3>${r.cards.slice().reverse().map(x => `<div class="line"><span class="small"><span class="muted">${x.date}</span> <span class="ar">${esc(x.q || '')}</span></span><b>${x.a ? (x.ok ? (x.a === x.ok ? '✓ ' : '✗ ') + x.a : x.a) : '<span class="muted">—</span>'}</b></div>`).join('')}</div>` : ''}
+      <div class="panel"><h3 style="margin-top:0">Absences</h3>${r.abs.length ? `<p><b>${r.abs.length}</b> session(s): ${r.abs.map(d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })).join(', ')}</p>` : '<p class="muted">None 👏</p>'}</div>
+      <p class="small muted" style="text-align:center">Updated ${new Date(data.updated).toLocaleString('en-GB')}</p>`;
+  }
+  load();
+})();
+</script>
+</body>
+</html>

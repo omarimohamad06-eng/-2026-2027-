@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="google" content="notranslate">
+<title>Quiz — ClassKit</title>
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="css/ck.css">
+<style>
+  :root{--qbg:#0f172a;--qcard:#151515;--qline:#2a2f3a}
+  body{background:var(--qbg);color:#e5e7eb;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  main{max-width:560px;padding:18px}
+  .qc{background:var(--qcard);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .qc h2{color:#fff}
+  input,select{background:#0b1220!important;border-color:var(--qline)!important;color:#fff!important;width:100%;padding:11px!important;border-radius:11px!important}
+  label.f{color:#9ca3af}
+  .go{width:100%;padding:14px;border-radius:14px;border:0;background:#3b82f6;color:#fff;font-weight:800;font-size:16px;cursor:pointer;margin-top:12px}
+  .go:disabled{opacity:.4}
+  .opt{display:block;width:100%;text-align:start;padding:14px 14px;margin:9px 0;border-radius:13px;border:1.5px solid var(--qline);background:#1b1f27;color:#fff;font-size:16px;cursor:pointer}
+  .opt.sel{border-color:#3b82f6;background:#172554}
+  .qtext{font-size:19px;font-weight:700;color:#fff;margin:6px 0 12px}
+  .guard{font-size:9px;color:#6b7280;margin-top:10px;line-height:1.3}
+  .bar{height:6px;background:#1f2937;border-radius:4px;overflow:hidden;margin:6px 0 2px}.bar i{display:block;height:100%;background:#3b82f6}
+  .top2{display:flex;justify-content:space-between;color:#9ca3af;font-size:13px;font-weight:700}
+  .icon{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 10px;font-size:30px;background:#2b2020}
+  .center{text-align:center}
+  .res{font-size:30px;font-weight:800;color:#fff}
+  .red{color:#ef4444}.green{color:#22c55e}
+  .qr{background:#fff;border-radius:12px;padding:10px;width:220px;margin:12px auto}.qr svg{width:100%;display:block}
+  .code{font:700 13px ui-monospace,monospace;color:#9ca3af;word-break:break-all;text-align:center}
+  .rules li{margin:6px 0}
+  .muted{color:#9ca3af}
+</style>
+</head>
+<body>
+<main id="m"><div class="qc">Loading…</div></main>
+<script src="vendor/qrcode.js"></script>
+<script src="js/shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { esc, fmt } = CK;
+  const m = document.getElementById('m');
+  let data, me, quiz, att, attKey, timerT = 0;
+  const REASON_TEXT = { L: 'You left the quiz page.', T: 'The page was translated.', R: 'Split screen or a floating window was used.', C: 'Copying is not allowed.', S: 'Screenshot key pressed.' };
+
+  async function boot() {
+    try {
+      const r = await fetch('data/portal.json?t=' + Date.now(), { cache: 'no-store' });
+      data = await r.json();
+    } catch (e) { m.innerHTML = '<div class="qc">No quiz is published yet.</div>'; return; }
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('classkit.portal.login') || 'null'); } catch (e) {}
+    login(saved);
+  }
+
+  function login(saved, err) {
+    m.innerHTML = `<div class="qc"><h2>Quiz</h2>
+      <label class="f">Class<select id="c">${data.classes.map(c => `<option value="${c.id}" ${saved && saved.c === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label><br>
+      <label class="f">Your number<input type="number" id="n" inputmode="numeric" value="${saved ? saved.n : ''}"></label><br>
+      <label class="f">Your PIN<input type="text" id="p" autocomplete="off" autocapitalize="characters" value="${saved ? esc(saved.p) : ''}" style="letter-spacing:.2em;text-transform:uppercase"></label>
+      ${err ? `<p class="red">${esc(err)}</p>` : ''}
+      <button class="go" id="go">Continue</button></div>`;
+    document.getElementById('go').onclick = async () => {
+      const c = document.getElementById('c').value, n = +document.getElementById('n').value, p = document.getElementById('p').value;
+      const box = data.records[c + ':' + n];
+      try {
+        const rec = await CK.open(box, p);
+        me = { cls: c, n, card: rec.card, name: rec.name, clsName: rec.cls };
+        localStorage.setItem('classkit.portal.login', JSON.stringify({ c, n, p }));
+        pickQuiz();
+      } catch (e) { login({ c, n, p: '' }, 'Wrong number or PIN.'); }
+    };
+  }
+
+  function pickQuiz(err) {
+    const list = data.quizzes.filter(q => q.classIds.includes(me.cls));
+    m.innerHTML = `<div class="qc"><div class="muted small">${esc(me.clsName)} · No. ${me.n}</div><h2 class="ar">${esc(me.name)}</h2>
+      ${list.length ? `<label class="f">Quiz<select id="q">${list.map(q => `<option value="${q.id}">${esc(q.title)}</option>`).join('')}</select></label><br>
+      <label class="f">Code written on the board<input type="text" id="code" autocomplete="off" autocapitalize="characters" style="letter-spacing:.25em;text-transform:uppercase;font-size:20px;text-align:center"></label>
+      ${err ? `<p class="red">${esc(err)}</p>` : ''}<button class="go" id="go">Open quiz</button>` : '<p class="muted">No quiz is open for your class right now.</p>'}</div>`;
+    if (!list.length) return;
+    document.getElementById('go').onclick = async () => {
+      const q = list.find(x => x.id === document.getElementById('q').value);
+      try { quiz = await CK.open(q.box, document.getElementById('code').value); }
+      catch (e) { return pickQuiz('Wrong code.'); }
+      attKey = `classkit.attempt.${quiz.id}.${me.card}`;
+      try { att = JSON.parse(localStorage.getItem(attKey) || 'null'); } catch (e) { att = null; }
+      if (att && att.status !== 'run') return finishScreen();
+      if (att && att.status === 'run') return remove('L'); // page was reloaded or left mid-quiz
+      rules();
+    };
+  }
+
+  function buildPaper() {
+    const rnd = CK.seeded(quiz.id + ':' + me.card);
+    let qs = quiz.questions.map((q, i) => ({ i, q }));
+    qs = CK.shuffle(qs, rnd);
+    if (quiz.perStudent && quiz.perStudent < qs.length) qs = qs.slice(0, quiz.perStudent);
+    return qs.map(({ i, q }) => ({ i, order: CK.shuffle(q.c.map((_, j) => j), rnd) }));
+  }
+
+  function rules() {
+    m.innerHTML = `<div class="qc"><h2>${esc(quiz.title)}</h2>
+      <p>${buildPaper().length} questions · ${quiz.minutes} min · score /${quiz.outOf}</p>
+      <ul class="rules">
+        <li>Your questions are <b>different</b> from your neighbour's.</li>
+        <li>One question at a time. You <b>cannot go back</b>.</li>
+        <li>If you <b>leave this page</b>, switch app, open notifications, use split screen, translate the page, copy or take a screenshot, <b class="red">you are removed immediately</b> with the score you had at that moment.</li>
+        <li>Do not reload the page.</li>
+      </ul>
+      <button class="go" id="go">I understand — start</button></div>`;
+    document.getElementById('go').onclick = () => {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      att = { status: 'run', paper: buildPaper(), pos: 0, answers: [], start: Date.now() };
+      persist();
+      arm();
+      question();
+    };
+  }
+  function persist() { try { localStorage.setItem(attKey, JSON.stringify(att)); } catch (e) {} }
+  function correctCount() {
+    return att.answers.reduce((s, a, k) => s + (a === quiz.questions[att.paper[k].i].a ? 1 : 0), 0);
+  }
+
+  // ── anti-cheat ──
+  let armed = false, armedAt = 0, baseW = 0, baseH = 0, baseO = '';
+  function arm() {
+    armed = true; armedAt = Date.now();
+    document.addEventListener('fullscreenchange', onFs);
+    baseW = innerWidth; baseH = innerHeight; baseO = orient();
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('blur', onBlur);
+    window.addEventListener('pagehide', onHide);
+    window.addEventListener('resize', onResize);
+    document.addEventListener('copy', onCopy);
+    document.addEventListener('contextmenu', block);
+    document.addEventListener('selectstart', block);
+    document.addEventListener('keyup', onKey);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'lang'], childList: true, subtree: true });
+  }
+  function disarm() {
+    armed = false;
+    document.removeEventListener('visibilitychange', onVis);
+    window.removeEventListener('blur', onBlur);
+    window.removeEventListener('pagehide', onHide);
+    window.removeEventListener('resize', onResize);
+    document.removeEventListener('copy', onCopy);
+    document.removeEventListener('keyup', onKey);
+    document.removeEventListener('fullscreenchange', onFs);
+    clearTimeout(rzT); clearTimeout(blurT);
+    obs.disconnect();
+    clearInterval(timerT);
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+  const orient = () => (innerWidth > innerHeight ? 'l' : 'p');
+  function onVis() { if (document.visibilityState === 'hidden') remove('L'); }
+  function onHide() { remove('L'); }
+  let blurT = 0;
+  function onBlur() { clearTimeout(blurT); blurT = setTimeout(() => { if (!document.hasFocus()) remove('L'); }, 400); }
+  let fsAt = 0, rzT = 0;
+  function onFs() { fsAt = Date.now(); rebase(); }
+  function rebase() { baseW = innerWidth; baseH = innerHeight; baseO = orient(); }
+  function onResize() {
+    clearTimeout(rzT);
+    rzT = setTimeout(() => {
+      // entering/leaving fullscreen or simply rotating the phone is fine
+      if (Date.now() - armedAt < 1500 || Date.now() - fsAt < 1200 || orient() !== baseO) return rebase();
+      if (Math.abs(innerWidth - baseW) > baseW * 0.15 || Math.abs(innerHeight - baseH) > baseH * 0.3) remove('R');
+    }, 400);
+  }
+  function onCopy(e) { e.preventDefault(); remove('C'); }
+  function block(e) { e.preventDefault(); }
+  function onKey(e) { if (e.key === 'PrintScreen') remove('S'); }
+  const obs = new MutationObserver(muts => {
+    const html = document.documentElement;
+    if (/translated/.test(html.className) || (html.lang && html.lang !== 'en')) return remove('T');
+    for (const mu of muts) for (const n of mu.addedNodes || []) if (n.nodeName === 'FONT') return remove('T');
+  });
+
+  function remove(reason) {
+    if (!att || att.status !== 'run') return;
+    att.status = 'removed'; att.reason = reason; att.end = Date.now();
+    persist(); disarm(); finishScreen();
+  }
+
+  function question() {
+    const k = att.pos, total = att.paper.length;
+    if (k >= total) { att.status = 'done'; att.end = Date.now(); persist(); disarm(); return finishScreen(); }
+    const p = att.paper[k], q = quiz.questions[p.i];
+    let sel = null;
+    m.innerHTML = `<div class="top2"><span>Question ${k + 1}/${total}</span><span id="tm"></span></div>
+      <div class="bar"><i style="width:${k / total * 100}%"></i></div>
+      <div class="qc"><div class="qtext ar">${esc(q.q)}</div>
+        ${p.order.map((j, x) => `<button class="opt ar" data-j="${j}">${'ABCDEFG'[x]}. ${esc(q.c[j])}</button>`).join('')}
+        ${quiz.aiGuard ? `<div class="guard">${esc(quiz.aiGuard)}</div>` : ''}
+        <button class="go" id="nx" disabled>${k + 1 === total ? 'Finish' : 'Next'}</button></div>`;
+    m.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      m.querySelectorAll('.opt').forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel'); sel = +b.dataset.j; document.getElementById('nx').disabled = false;
+    });
+    document.getElementById('nx').onclick = () => { att.answers.push(sel); att.pos++; persist(); question(); };
+    tick();
+    clearInterval(timerT); timerT = setInterval(tick, 1000);
+  }
+  function tick() {
+    const left = Math.max(0, att.start + quiz.minutes * 60000 - Date.now());
+    const el = document.getElementById('tm');
+    if (el) el.textContent = `${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')}`;
+    if (left <= 0 && att.status === 'run') { att.status = 'timeup'; att.end = Date.now(); persist(); disarm(); finishScreen(); }
+  }
+
+  async function finishScreen() {
+    const ok = correctCount(), total = att.paper.length;
+    const score = ok / total * quiz.outOf;
+    const st = { done: 'D', removed: 'X', timeup: 'T' }[att.status];
+    const body = ['R1', quiz.id.toUpperCase(), me.card, ok, total, st, att.reason || '-', (att.end || Date.now()).toString(36).toUpperCase()].join('.');
+    const code = body + '.' + await CK.sign(body, quiz.secret);
+    const removed = att.status === 'removed';
+    m.innerHTML = `<div class="qc center">
+      <div class="icon">${removed ? '🚫' : att.status === 'timeup' ? '⏱' : '✅'}</div>
+      <h2 class="${removed ? 'red' : 'green'}">${removed ? 'Removed from Quiz' : att.status === 'timeup' ? 'Time is up' : 'Quiz finished'}</h2>
+      ${removed ? `<p>${REASON_TEXT[att.reason] || ''}</p><p class="muted">Score at time of removal:</p>` : '<p class="muted">Your score:</p>'}
+      <div class="res">${fmt(score)} / ${quiz.outOf}</div>
+      <p class="muted small" style="margin-top:14px">Show this code to your teacher</p>
+      <div class="qr">${CK.qrSvg(code, { ec: 'M' })}</div>
+      <div class="code">${code}</div>
+      <p class="small muted ar">${esc(me.name)} · ${esc(me.clsName)} · No. ${me.n}</p></div>`;
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
