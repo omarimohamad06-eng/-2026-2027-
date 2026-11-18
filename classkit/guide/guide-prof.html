@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClassKit — Teacher guide</title>
+<style>
+  @page { size: A3 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  :root { --ink:#1b1a17; --muted:#6b655c; --line:#ddd5c6; --paper:#fbf8f2; --green:#1f7a4d; --green-pale:#e3f3ea; --blue:#2f4fa8; --blue-pale:#e6ecfa; --red:#c62828; --red-pale:#fde4e1; --amber-pale:#fdf0d3; }
+  html, body { margin: 0; }
+  body { font-family: "Inter", "Segoe UI", system-ui, sans-serif; color: var(--ink); background: #fff; }
+  .page { width: 297mm; height: 420mm; padding: 10mm 11mm 7mm; background: var(--paper); display: flex; flex-direction: column; gap: 3.6mm; overflow: hidden; }
+  header { display: flex; align-items: center; gap: 6mm; border-bottom: 1.1mm solid var(--ink); padding-bottom: 3mm; }
+  header .logo { width: 17mm; height: 17mm; border-radius: 4.5mm; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 9mm; }
+  header h1 { margin: 0; font-size: 11.5mm; line-height: 1; letter-spacing: -.03em; }
+  header p { margin: 1.2mm 0 0; font-size: 4.2mm; color: var(--muted); }
+  header .qr { margin-left: auto; display: flex; align-items: center; gap: 3mm; font-size: 3.2mm; text-align: right; line-height: 1.35; }
+  header .qr svg { width: 19mm; height: 19mm; background: #fff; padding: 1mm; border-radius: 1.5mm; }
+  .row { display: grid; gap: 3.6mm; }
+  section { background: #fff; border: .45mm solid var(--line); border-radius: 4.5mm; padding: 3.4mm 4.2mm; }
+  h2 { margin: 0 0 2.4mm; font-size: 5.4mm; letter-spacing: -.02em; display: flex; align-items: center; gap: 2.4mm; }
+  h2 .n { width: 8mm; height: 8mm; border-radius: 50%; background: var(--ink); color: #fff; display: inline-grid; place-items: center; font-size: 4.3mm; flex: none; }
+  h2 .when { margin-left: auto; font-size: 3.1mm; font-weight: 700; color: var(--blue); background: var(--blue-pale); border-radius: 10mm; padding: .8mm 2.6mm; }
+  img.s { width: 100%; display: block; border: .35mm solid var(--line); border-radius: 2.5mm; }
+  ol, ul { margin: 0; padding-left: 5mm; }
+  li { font-size: 3.35mm; line-height: 1.38; margin: .5mm 0; }
+  li b { font-weight: 700; }
+  .k { display: inline-block; font-size: 3mm; font-weight: 700; border: .35mm solid #bdb5a6; border-radius: 1.4mm; padding: 0 1.4mm; background: #fff; white-space: nowrap; }
+  .tip { margin-top: 2mm; background: var(--amber-pale); border-radius: 2.5mm; padding: 1.8mm 2.6mm; font-size: 3.2mm; line-height: 1.35; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; align-items: start; }
+  .check li { list-style: none; position: relative; padding-left: 1mm; }
+  .check li::before { content: "☐"; position: absolute; left: -4.6mm; font-size: 3.8mm; }
+  .formula { margin-top: 2mm; background: var(--green-pale); border-radius: 2.5mm; padding: 1.8mm 2.6mm; font-size: 3.2mm; line-height: 1.4; }
+  footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 3.1mm; color: var(--muted); border-top: .4mm solid var(--line); padding-top: 2mm; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo">✦</div>
+    <div>
+      <h1>ClassKit — Teacher guide</h1>
+      <p>SVT · Pr Omari Mohammed · 2026/2027</p>
+    </div>
+    <div class="qr"><div><b>Teacher app</b><br><span id="appurl"></span></div><div id="qr"></div></div>
+  </header>
+
+  <div class="row" style="grid-template-columns: 1fr 1.9fr">
+    <section>
+      <h2><span class="n">0</span>Once, at the start</h2>
+      <ol class="check">
+        <li>Open the teacher app (QR above) on <b>your</b> laptop or phone.</li>
+        <li><span class="k">Choose roster / backup file…</span> → <b>roster-2026-2027.json</b>. The 5 classes load (168 students).</li>
+        <li><b>Seating → Arrange</b>: place each student on their table for the year.</li>
+        <li><b>Students &amp; PINs</b> → <span class="k">Print PIN slips</span>, cut and hand out.</li>
+        <li><b>QR cards</b> → <span class="k">Print cards</span> for each class (laminate them).</li>
+        <li><b>Publish</b>: put the public address, then <b>Settings</b>: check the barème (5/5/5/5).</li>
+        <li>Stick the student poster in the classroom.</li>
+      </ol>
+      <div class="tip">🔒 The names stay <b>only in your browser</b>. Never upload the roster file to GitHub.</div>
+    </section>
+    <section>
+      <h2><span class="n">1</span>Attendance in 10 seconds<span class="when">every lesson</span></h2>
+      <img class="s" src="img/t-seating.png" style="height:62mm;object-fit:cover;object-position:top">
+      <ul style="margin-top:2mm">
+        <li><b>Attendance</b> mode: tap the student of each <b>empty table</b> → red. Their numbers appear in <b>Absent student numbers</b> → <span class="k">Copy numbers</span> for the official register.</li>
+        <li>Each absence automatically removes <b>0.5</b> from the Absence grade. <span class="k">blur names</span> before projecting.</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1fr 1.9fr">
+    <section>
+      <h2><span class="n">2</span>Points during the lesson</h2>
+      <img class="s" src="img/t-points.png" style="height:43mm;object-fit:cover;object-position:top">
+      <ol style="margin-top:2mm">
+        <li><b>Seating → Points</b>, tap the student.</li>
+        <li>Tap a <b>reason</b> (Bavardage, Bonne réponse…), then <b>+</b> or <b>−</b>.</li>
+        <li>The student sees it, with date and reason, after the next Publish.</li>
+      </ol>
+    </section>
+    <section>
+      <h2><span class="n">3</span>Gradebook<span class="when">after each check / contrôle</span></h2>
+      <img class="s" src="img/t-grades.png" style="height:45mm;object-fit:cover;object-position:top left">
+      <div class="two" style="margin-top:2mm">
+        <ul>
+          <li><b>+/−</b>: Participation, Cahier (2 checks), Travail à rédiger (2 pieces).</li>
+          <li><b>Absence</b> is calculated; its +/− only <b>adjusts</b> it (justified absence).</li>
+          <li>Type <b>Contrôle 1 / 2</b> marks; the final grade updates by itself.</li>
+        </ul>
+        <div>
+          <div class="formula"><b>Activités /20</b> = Participation /5 + Absence /5 + Cahier /5 + Travail /5<br><b>Final</b> = (Contrôle 1 + Contrôle 2 + Activités) ÷ 3</div>
+          <ul style="margin-top:1.5mm"><li><span class="k">⏱</span> full history of a student · <span class="k">Export CSV</span> for Excel.</li></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1.55fr 1fr">
+    <section>
+      <h2><span class="n">4</span>QR answer cards<span class="when">no phones needed</span></h2>
+      <img class="s" src="img/t-cards.png" style="height:50mm;object-fit:cover;object-position:top left">
+      <ol style="margin-top:2mm">
+        <li>Choose a <b>Banque de questions SVT</b>, press <span class="k">Question suivante ▸</span>: question + 4 choices on the projector, correct letter already set.</li>
+        <li><span class="k">📷 Start scanning</span> and sweep the camera slowly over the class. Numbers turn green.</li>
+        <li><span class="k">Reveal answers</span>, discuss, then <span class="k">Save result</span> (optional: +points for correct answers). The camera stays on for the next question.</li>
+      </ol>
+    </section>
+    <section>
+      <h2><span class="n">5</span>Phone quiz</h2>
+      <img class="s" src="img/t-results.png" style="height:36mm;object-fit:cover;object-position:top">
+      <ol style="margin-top:2mm">
+        <li><span class="k">+ New quiz</span> → pick a bank → <span class="k">Add these questions</span>; set questions per student, time, code. <b>Save</b>.</li>
+        <li><span class="k">Open</span>, then <b>Publish</b>. Write the <b>code</b> on the board.</li>
+        <li>At the end: <span class="k">Results</span> → <span class="k">📷 Scan result codes</span> on each phone → <b>Copy into Contrôle</b> if wanted.</li>
+      </ol>
+      <div class="tip" style="background:var(--red-pale)">Removed students show in red with the reason. No result = did not take the quiz.</div>
+    </section>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1.55fr 1fr">
+    <section>
+      <h2><span class="n">6</span>Publish for students<span class="when">once or twice a week</span></h2>
+      <div class="two" style="grid-template-columns: 1.05fr 1fr">
+        <img class="s" src="img/t-publish.png" style="height:44mm;object-fit:cover;object-position:top left">
+        <ol>
+          <li><span class="k">Build &amp; download portal.json</span>.</li>
+          <li>GitHub → repository → branch <b>claude/attendance-register-app-htpei6</b> → folder <b>classkit/data/</b> → <b>Add file → Upload files</b> → Commit.</li>
+          <li>One minute later, students see the new grades.</li>
+          <li><i>Faster:</i> add a GitHub token in Publish, then just press <span class="k">Build &amp; push to GitHub</span>.</li>
+        </ol>
+      </div>
+    </section>
+    <section>
+      <h2><span class="n">7</span>Keep your data safe</h2>
+      <ul>
+        <li>Data lives in <b>this browser only</b>: always use the same laptop/browser.</li>
+        <li><b>Settings → Download backup</b> every week (USB key / e-mail to yourself).</li>
+        <li>New device? <b>Restore backup…</b> there.</li>
+        <li>Lost PIN: <b>Students &amp; PINs → New PIN</b>, then Publish.</li>
+        <li>Never use private/incognito mode.</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer><span>ClassKit · teacher reference sheet</span><span>Student poster: classkit/guide/poster-eleves-A3.pdf</span></footer>
+</div>
+<script src="../vendor/qrcode.js"></script>
+<script>
+  const base = new URLSearchParams(location.search).get('url') || 'https://omarimohamad06-eng.github.io/-2026-2027-/classkit/';
+  const url = base.replace(/\/?$/, '/');
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+  document.getElementById('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  document.getElementById('appurl').textContent = url.replace(/^https:\/\//, '');
+</script>
+</body>
+</html>
