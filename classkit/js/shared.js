@@ -110,7 +110,7 @@
 
   /** Grade maths (SVT activités intégrées), shared so the portal shows exactly what the teacher sees.
       participation + absence + organisation du cahier + travail à rédiger → /20 (rescaled if the maxima don't add up to 20);
-      absence = max − penalty × sessions missed + manual adjustment. Final = mean of Contrôle 1, Contrôle 2 and activités. */
+      absence = max − penalty × sessions missed + manual adjustment. Final = mean of the contrôles entered and activités. */
   function computeGrades(gr, cfg, nAbs) {
     cfg = cfg || {};
     const M = { part: cfg.maxPart || 5, abs: cfg.maxAbs || 5, cah: cfg.maxCahier || 5, tra: cfg.maxTravail || 5 };
@@ -122,10 +122,13 @@
     const travail = cfg.travailCount === 1 ? (num(gr.tr1) || 0) : ((num(gr.tr1) || 0) + (num(gr.tr2) || 0)) / 2;
     const total = M.part + M.abs + M.cah + M.tra;
     const act = clamp((part + absence + cahier + travail) / total * 20, 0, 20);
-    const t1 = num(gr.t1), t2 = num(gr.t2);
-    const parts = [t1, t2, act].filter(v => v != null);
-    const final = (t1 == null && t2 == null) ? null : parts.reduce((a, b) => a + b, 0) / parts.length;
-    return { part, absence, nAbs, cahier, travail, act, t1, t2, final };
+    // Number of contrôles per semester depends on the class (2BAC SVT: 3, others: 2).
+    const nTests = cfg.nTests || 2;
+    const tests = [];
+    for (let i = 1; i <= nTests; i++) tests.push(num(gr['t' + i]));
+    const done = tests.filter(v => v != null);
+    const final = done.length ? (done.reduce((a, b) => a + b, 0) + act) / (done.length + 1) : null;
+    return { part, absence, nAbs, cahier, travail, act, tests, t1: tests[0], t2: tests[1], t3: tests[2] == null ? null : tests[2], nTests, final };
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function fmt(v, d) {

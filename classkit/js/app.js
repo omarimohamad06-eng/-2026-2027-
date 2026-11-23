@@ -28,6 +28,7 @@
   S.settings = Object.assign(blank().settings, S.settings);
   S.ui.date = S.ui.date || today();
   // v2: one column each for cahier and travail à rédiger (the earlier default was two, averaged).
+  S.classes.forEach(c => { if (!c.tests) c.tests = /2\s*BAC.*SVT/i.test(c.name) ? 3 : 2; });
   if (!S.settings.oneColumnEach) { S.settings.cahierChecks = 1; S.settings.travailCount = 1; S.settings.oneColumnEach = true; }
   let saveT = 0;
   function save() {
@@ -42,7 +43,7 @@
   const stuById = id => { for (const c of S.classes) { const s = c.students.find(x => x.id === id); if (s) return s; } return null; };
   const name = s => `${s.first} ${s.last}`.trim();
   function gr(sid) {
-    if (!S.grades[sid]) S.grades[sid] = { part: 0, absAdj: 0, cb1: 0, cb2: 0, tr1: 0, tr2: 0, note: '', t1: '', t2: '' };
+    if (!S.grades[sid]) S.grades[sid] = { part: 0, absAdj: 0, cb1: 0, cb2: 0, tr1: 0, tr2: 0, note: '', t1: '', t2: '', t3: '' };
     return S.grades[sid];
   }
   function absentOn(c, date) { return ((S.absences[c.id] || {})[date]) || []; }
@@ -64,14 +65,18 @@
     cb2: { label: 'Organisation du cahier (2e contrôle)', get max() { return S.settings.maxCahier; } },
     tr1: { label: 'Travail à rédiger 1', get max() { return S.settings.maxTravail; } },
     tr2: { label: 'Travail à rédiger 2', get max() { return S.settings.maxTravail; } },
-    t1: { label: 'Contrôle 1', max: 20 }, t2: { label: 'Contrôle 2', max: 20 },
+    t1: { label: 'Contrôle 1', max: 20 }, t2: { label: 'Contrôle 2', max: 20 }, t3: { label: 'Contrôle 3', max: 20 },
   };
   /** Number of sessions a student was marked absent (from the seating plan / gradebook). */
   function absCount(sid) {
     const c = S.classes.find(k => k.students.some(x => x.id === sid));
     return c ? Object.values(S.absences[c.id] || {}).filter(l => l.includes(sid)).length : 0;
   }
-  const grades = sid => computeGrades(gr(sid), S.settings, absCount(sid));
+  const classOf = sid => S.classes.find(k => k.students.some(x => x.id === sid));
+  /** Contrôles per semester: 3 in 2BAC SVT, 2 elsewhere (changeable per class in Students & PINs). */
+  const defaultTests = name => (/2\s*BAC.*SVT/i.test(name) ? 3 : 2);
+  const nTestsOf = c => (c && c.tests) || 2;
+  const grades = sid => computeGrades(gr(sid), Object.assign({}, S.settings, { nTests: nTestsOf(classOf(sid)) }), absCount(sid));
   function bump(sid, f, delta, why) {
     const g = gr(sid);
     const old = +g[f] || 0;
@@ -113,7 +118,7 @@
     if (replace) { S.classes = []; }
     for (const c of data.classes || []) {
       let k = S.classes.find(x => x.name === c.name);
-      if (!k) { k = { id: uid(), name: c.name, official: c.official || '', rows: 6, cols: 8, students: [] }; S.classes.push(k); }
+      if (!k) { k = { id: uid(), name: c.name, official: c.official || '', rows: 6, cols: 8, tests: defaultTests(c.name), students: [] }; S.classes.push(k); }
       for (const s of c.students) {
         if (k.students.some(x => x.n === s.n && x.code === s.code)) continue;
         k.students.push({ id: uid(), n: s.n, code: s.code || '', first: s.first || '', last: s.last || '', g: s.g || '', pin: randomCode(6), card: S.nextCard++, seat: null });
@@ -340,6 +345,7 @@
     const dlabel = new Date(S.ui.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
     const cb2 = st.cahierChecks === 2, tr2 = st.travailCount === 2;
     const nCols = 2 + (cb2 ? 2 : 1) + (tr2 ? 2 : 1);
+    const nT = nTestsOf(c);
     v.innerHTML = `
       <div class="row noprint" style="margin-bottom:10px">
         <input type="date" id="date" value="${S.ui.date}">
@@ -351,13 +357,13 @@
       <div class="tablewrap"><table class="gb"><thead>
         <tr><th rowspan="2">Élève</th><th rowspan="2">Absent<br><span class="small" style="font-weight:400">${dlabel}</span></th>
           <th colspan="${nCols}">Activités intégrées · /20</th><th rowspan="2">Remarque (visible par l’élève)</th><th rowspan="2">Activités<br>/20</th>
-          <th rowspan="2">Contrôle 1<br>/20</th><th rowspan="2">Contrôle 2<br>/20</th><th rowspan="2">Note finale<br>/20</th></tr>
+          ${Array.from({ length: nT }, (_, i) => `<th rowspan="2">Contrôle ${i + 1}<br>/20</th>`).join('')}<th rowspan="2">Note finale<br>/20</th></tr>
         <tr><th>Participation · /${st.maxPart}</th><th>Absence · /${st.maxAbs}</th>
           ${cb2 ? `<th>Cahier (1) · /${st.maxCahier}</th><th>Cahier (2) · /${st.maxCahier}</th>` : `<th>Organisation du cahier · /${st.maxCahier}</th>`}
           ${tr2 ? `<th>Travail à rédiger 1 · /${st.maxTravail}</th><th>Travail à rédiger 2 · /${st.maxTravail}</th>` : `<th>Travail à rédiger · /${st.maxTravail}</th>`}</tr>
-      </thead><tbody>${c.students.map(s => gradeRow(s, abs.has(s.id), cb2, tr2)).join('')}</tbody></table></div>
+      </thead><tbody>${c.students.map(s => gradeRow(s, abs.has(s.id), cb2, tr2, nT)).join('')}</tbody></table></div>
       <p class="small muted">Activités intégrées = participation + absence + organisation du cahier${cb2 ? ' (moyenne des 2 contrôles)' : ''} + travail à rédiger${tr2 ? ' (moyenne des 2 travaux)' : ''}${st.maxPart + st.maxAbs + st.maxCahier + st.maxTravail !== 20 ? ', ramené sur 20' : ''}.
-        Absence = ${st.maxAbs} − ${st.absPenalty} par séance d’absence non justifiée (± ajustement avec les boutons, ex. absence justifiée). Note finale = moyenne de Contrôle 1, Contrôle 2 et Activités. Barème modifiable dans Settings.</p>`;
+        Absence = ${st.maxAbs} − ${st.absPenalty} par séance d’absence non justifiée (± ajustement avec les boutons, ex. absence justifiée). Note finale = (${Array.from({ length: nT }, (_, i) => 'Contrôle ' + (i + 1)).join(' + ')} + Activités) ÷ ${nT + 1}. ${nT} contrôles par semestre pour cette classe (modifiable dans Students &amp; PINs). Barème modifiable dans Settings.</p>`;
 
     $('#date').onchange = e => { S.ui.date = e.target.value || today(); save(); render(); };
     $('#q').oninput = e => {
@@ -387,7 +393,7 @@
       if (e.target.matches('textarea')) { gr(e.target.closest('tr').dataset.sid).note = e.target.value; save(); }
     });
   }
-  function gradeRow(s, isAbs, cb2, tr2) {
+  function gradeRow(s, isAbs, cb2, tr2, nT) {
     const g = gr(s.id), cg = grades(s.id);
     return `<tr data-sid="${s.id}" data-k="${esc((s.n + ' ' + name(s)).toLowerCase())}" class="${isAbs ? 'isabs' : ''}">
       <td class="name"><button class="btn sm" data-act="hist" title="Historique">⏱</button> <span class="n">${s.n}</span> <span class="ar">${esc(name(s))}</span></td>
@@ -398,8 +404,7 @@
       <td>${stepper('tr1', g.tr1)}</td>${tr2 ? `<td>${stepper('tr2', g.tr2)}</td>` : ''}
       <td><textarea placeholder="Ajouter une remarque">${esc(g.note)}</textarea></td>
       <td><span class="oral ${cg.act >= 10 ? 'good' : ''}" data-o>${fmt(cg.act)}</span></td>
-      <td><input class="score" data-f="t1" type="number" min="0" max="20" step="0.25" placeholder="/20" value="${g.t1}"></td>
-      <td><input class="score" data-f="t2" type="number" min="0" max="20" step="0.25" placeholder="/20" value="${g.t2}"></td>
+      ${Array.from({ length: nT }, (_, i) => `<td><input class="score" data-f="t${i + 1}" type="number" min="0" max="20" step="0.25" placeholder="/20" value="${g['t' + (i + 1)] == null ? '' : g['t' + (i + 1)]}"></td>`).join('')}
       <td class="final" data-fin>${fmt(cg.final)}</td></tr>`;
   }
   function refreshRow(tr) {
@@ -416,10 +421,11 @@
       <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn pri" id="hx">Close</button></div>`, (d, close) => { $('#hx', d).onclick = close; });
   }
   function exportCsv(c) {
-    const head = ['N°', 'Code Massar', 'Nom', 'Participation', 'Absences (séances)', 'Absence', 'Cahier', 'Travail à rédiger', 'Activités /20', 'Contrôle 1', 'Contrôle 2', 'Note finale', 'Remarque'];
+    const nT = nTestsOf(c);
+    const head = ['N°', 'Code Massar', 'Nom', 'Participation', 'Absences (séances)', 'Absence', 'Cahier', 'Travail à rédiger', 'Activités /20', ...Array.from({ length: nT }, (_, i) => 'Contrôle ' + (i + 1)), 'Note finale', 'Remarque'];
     const lines = c.students.map(s => {
       const g = gr(s.id), cg = grades(s.id);
-      return [s.n, s.code, name(s), g.part, cg.nAbs, fmt(cg.absence), fmt(cg.cahier), fmt(cg.travail), fmt(cg.act), g.t1, g.t2, fmt(cg.final), g.note];
+      return [s.n, s.code, name(s), g.part, cg.nAbs, fmt(cg.absence), fmt(cg.cahier), fmt(cg.travail), fmt(cg.act), ...Array.from({ length: nT }, (_, i) => g['t' + (i + 1)]), fmt(cg.final), g.note];
     });
     download(`${c.name}-notes.csv`, '﻿' + [head, ...lines].map(r => r.map(x => `"${String(x == null ? '' : x).replace(/"/g, '""')}"`).join(';')).join('\r\n'), 'text/csv');
   }
@@ -672,7 +678,7 @@
         const r = res[s.id];
         return `<tr><td>${s.n}</td><td class="ar">${esc(name(s))}</td><td>${r ? `<b>${fmt(r.score)}</b>/${q.outOf}` : '—'}</td><td>${r ? (r.status === 'done' ? '<span class="pill ok">finished</span>' : r.status === 'timeup' ? '<span class="pill warn">time up</span>' : `<span class="pill bad">removed${r.reason ? ': ' + esc(r.reason) : ''}</span>`) : '<span class="pill">no result</span>'}</td></tr>`;
       }).join('')}</tbody></table>
-      <div class="row" style="margin-top:10px"><label class="small row">Copy scores into <select id="rto"><option value="">—</option><option value="t1">Contrôle 1</option><option value="t2">Contrôle 2</option></select></label><button class="btn sm" id="rcopy">Copy</button><span class="spacer"></span><button class="btn pri" id="rx">Close</button></div>`;
+      <div class="row" style="margin-top:10px"><label class="small row">Copy scores into <select id="rto"><option value="">—</option>${Array.from({ length: nTestsOf(c) }, (_, i) => `<option value="t${i + 1}">Contrôle ${i + 1}</option>`).join('')}</select></label><button class="btn sm" id="rcopy">Copy</button><span class="spacer"></span><button class="btn pri" id="rx">Close</button></div>`;
     dialog('', (d, close) => {
       const mount = () => {
         d.innerHTML = draw();
@@ -720,7 +726,7 @@
   function renderStudents(v) {
     const c = cls();
     v.innerHTML = `<div class="row"><h2>${esc(c.name)} <span class="muted small">${esc(c.official || '')} · ${c.students.length} students</span></h2><span class="spacer"></span>
-        <button class="btn sm" id="addst">+ Student</button><button class="btn sm" id="slips">Print PIN slips</button><button class="btn sm" id="rename">Rename class</button><button class="btn sm danger" id="delc">Delete class</button></div>
+        <button class="btn sm" id="addst">+ Student</button><button class="btn sm" id="slips">Print PIN slips</button><label class="small row">Contrôles / semestre <select id="ntests">${[1, 2, 3, 4].map(n => `<option ${nTestsOf(c) === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label><button class="btn sm" id="rename">Rename class</button><button class="btn sm danger" id="delc">Delete class</button></div>
       <div class="panel" style="overflow:auto"><table class="list"><thead><tr><th>No.</th><th>Last name</th><th>First name</th><th>G</th><th>Massar</th><th>PIN</th><th>Card</th><th></th></tr></thead><tbody>
       ${c.students.map(s => `<tr data-sid="${s.id}"><td><input type="number" data-k="n" value="${s.n}" style="width:60px"></td>
         <td><input type="text" data-k="last" class="ar" value="${esc(s.last)}"></td><td><input type="text" data-k="first" class="ar" value="${esc(s.first)}"></td>
@@ -745,6 +751,7 @@
     });
     $('#addst').onclick = () => { const n = Math.max(0, ...c.students.map(s => s.n)) + 1; c.students.push({ id: uid(), n, code: '', first: '', last: 'New student', g: 'M', pin: randomCode(6), card: S.nextCard++, seat: null }); save(); render(); };
     $('#pgo').onclick = () => { const rows = parsePaste($('#paste').value); if (!rows.length) return toast('Nothing recognised'); importRoster({ classes: [{ name: c.name, students: rows }] }); };
+    $('#ntests').onchange = e => { c.tests = +e.target.value; save(); toast(`${c.name}: ${c.tests} contrôles par semestre`); };
     $('#rename').onclick = () => { const n = prompt('Class name', c.name); if (n) { c.name = n.trim(); save(); render(); } };
     $('#delc').onclick = () => {
       if (!confirm(`Delete ${c.name} and all its data?`)) return;
@@ -775,7 +782,7 @@
       const absDates = Object.entries(S.absences[c.id] || {}).filter(([, l]) => l.includes(s.id)).map(([d]) => d).sort();
       const cards = S.cardSessions.filter(x => x.classId === c.id).map(x => ({ date: x.date, q: x.q, a: x.answers[s.id] || null, ok: x.correct || null }));
       const quizzes = S.quizzes.filter(q => q.classIds.includes(c.id) && (S.quizResults[q.id] || {})[s.id]).map(q => { const r = S.quizResults[q.id][s.id]; return { title: q.title, score: r.score, outOf: q.outOf, status: r.status, reason: r.reason }; });
-      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: grades(s.id), cfg: { maxPart: S.settings.maxPart, maxAbs: S.settings.maxAbs, maxCahier: S.settings.maxCahier, maxTravail: S.settings.maxTravail, absPenalty: S.settings.absPenalty, cahierChecks: S.settings.cahierChecks, travailCount: S.settings.travailCount }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
+      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: grades(s.id), cfg: { nTests: nTestsOf(c), maxPart: S.settings.maxPart, maxAbs: S.settings.maxAbs, maxCahier: S.settings.maxCahier, maxTravail: S.settings.maxTravail, absPenalty: S.settings.absPenalty, cahierChecks: S.settings.cahierChecks, travailCount: S.settings.travailCount }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
       out.records[c.id + ':' + s.n] = await CK.seal(rec, s.pin);
       progress && progress(++i, all.length);
     }

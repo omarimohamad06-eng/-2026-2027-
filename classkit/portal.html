@@ -9,7 +9,7 @@
 <style>
   main{max-width:640px}
   .big{font-size:34px;font-weight:800}
-  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
   .kpi b{display:block;font-size:22px}
   .meter{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:4px}
@@ -32,7 +32,7 @@
   const m = document.getElementById('m');
   const MEM = 'classkit.portal.login';
   let data;
-  const FL = { part: 'Participation', absAdj: 'Absence (ajustement)', cb1: 'Organisation du cahier', cb2: 'Organisation du cahier (2e contrôle)', tr1: 'Travail à rédiger 1', tr2: 'Travail à rédiger 2', t1: 'Contrôle 1', t2: 'Contrôle 2' };
+  const FL = { part: 'Participation', absAdj: 'Absence (ajustement)', cb1: 'Organisation du cahier', cb2: 'Organisation du cahier (2e contrôle)', tr1: 'Travail à rédiger 1', tr2: 'Travail à rédiger 2', t1: 'Contrôle 1', t2: 'Contrôle 2', t3: 'Contrôle 3' };
 
   async function load() {
     try {
@@ -90,7 +90,7 @@
     m.innerHTML = `
       <div class="panel"><div class="row"><div><div class="ar" style="font-size:20px;font-weight:800">${esc(r.name)}</div><div class="muted small">${esc(r.cls)} · N° ${r.n}</div></div><span class="spacer"></span>
         <div style="text-align:center"><div class="big">${fmt(k.final)}</div><div class="small muted">note finale /20</div></div></div></div>
-      <div class="kpis"><div class="kpi"><b>${fmt(k.act)}</b><span class="small muted">Activités /20</span></div><div class="kpi"><b>${fmt(k.t1)}</b><span class="small muted">Contrôle 1</span></div><div class="kpi"><b>${fmt(k.t2)}</b><span class="small muted">Contrôle 2</span></div></div>
+      <div class="kpis"><div class="kpi"><b>${fmt(k.act)}</b><span class="small muted">Activités /20</span></div>${(k.tests || [k.t1, k.t2]).map((t, i) => `<div class="kpi"><b>${fmt(t)}</b><span class="small muted">Contrôle ${i + 1}</span></div>`).join('')}</div>
       <div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Activités intégrées</h3>
         <div class="line"><span>Participation</span><b>${fmt(k.part)} / ${mx.part}</b></div>${meter(k.part, mx.part)}
         <div class="line"><span>Absence <span class="small muted">(${k.nAbs} séance(s) d’absence)</span></span><b>${fmt(k.absence)} / ${mx.abs}</b></div>${meter(k.absence, mx.abs)}

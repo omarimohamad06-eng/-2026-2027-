@@ -33,7 +33,7 @@ All data stays in the browser on that computer (localStorage). Go to **Settings 
 | **Travail à rédiger** | 5 | one score (Settings can switch to 2 pieces, averaged) |
 
 The maxima, the penalty per absence and the number of checks are set in **Settings → Barème**. If the maxima don't add up to 20,
-the score is scaled to /20. **Note finale** = average of Contrôle 1, Contrôle 2 and Activités intégrées.
+the score is scaled to /20. **Note finale** = average of the contrôles and Activités intégrées: (C1 + C2 + Activités) ÷ 3, or (C1 + C2 + C3 + Activités) ÷ 4 in **2BAC SVT**, which has 3 contrôles per semester. The number of contrôles is set per class in **Students & PINs**.
 
 Every +/− is saved with its date, time and an optional reason ("Bonne réponse", "Bavardage", "Cahier incomplet", "Travail non rendu"…).
 Students see this full history on their portal, in French.
