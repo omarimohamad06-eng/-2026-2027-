@@ -15,7 +15,7 @@
     v: 1,
     settings: {
       teacher: '', school: '', year: '2026/2027', subject: 'SVT',
-      maxPart: 5, maxAbs: 5, maxCahier: 5, maxTravail: 5, absPenalty: 0.5, cahierChecks: 1, travailCount: 1, step: 0.5,
+      maxPart: 5, maxAbs: 5, maxCahier: 5, maxTravail: 5, absPenalty: 0.5, weightTests: 0.75, cahierChecks: 1, travailCount: 1, step: 0.5,
       portalUrl: '', gh: { owner: '', repo: '', branch: '', path: 'classkit/data/portal.json', token: '' },
       blurNames: false,
     },
@@ -363,7 +363,7 @@
           ${tr2 ? `<th>Travail à rédiger 1 · /${st.maxTravail}</th><th>Travail à rédiger 2 · /${st.maxTravail}</th>` : `<th>Travail à rédiger · /${st.maxTravail}</th>`}</tr>
       </thead><tbody>${c.students.map(s => gradeRow(s, abs.has(s.id), cb2, tr2, nT)).join('')}</tbody></table></div>
       <p class="small muted">Activités intégrées = participation + absence + organisation du cahier${cb2 ? ' (moyenne des 2 contrôles)' : ''} + travail à rédiger${tr2 ? ' (moyenne des 2 travaux)' : ''}${st.maxPart + st.maxAbs + st.maxCahier + st.maxTravail !== 20 ? ', ramené sur 20' : ''}.
-        Absence = ${st.maxAbs} − ${st.absPenalty} par séance d’absence non justifiée (± ajustement avec les boutons, ex. absence justifiée). Note finale = (${Array.from({ length: nT }, (_, i) => 'Contrôle ' + (i + 1)).join(' + ')} + Activités) ÷ ${nT + 1}. ${nT} contrôles par semestre pour cette classe (modifiable dans Students &amp; PINs). Barème modifiable dans Settings.</p>`;
+        Absence = ${st.maxAbs} − ${st.absPenalty} par séance d’absence non justifiée (± ajustement avec les boutons, ex. absence justifiée). Note générale = moyenne des ${nT} contrôles × ${Math.round(st.weightTests * 100)} % + Activités × ${Math.round((1 - st.weightTests) * 100)} %. ${nT} contrôles par semestre pour cette classe (modifiable dans Students &amp; PINs). Barème modifiable dans Settings.</p>`;
 
     $('#date').onchange = e => { S.ui.date = e.target.value || today(); save(); render(); };
     $('#q').oninput = e => {
@@ -782,7 +782,7 @@
       const absDates = Object.entries(S.absences[c.id] || {}).filter(([, l]) => l.includes(s.id)).map(([d]) => d).sort();
       const cards = S.cardSessions.filter(x => x.classId === c.id).map(x => ({ date: x.date, q: x.q, a: x.answers[s.id] || null, ok: x.correct || null }));
       const quizzes = S.quizzes.filter(q => q.classIds.includes(c.id) && (S.quizResults[q.id] || {})[s.id]).map(q => { const r = S.quizResults[q.id][s.id]; return { title: q.title, score: r.score, outOf: q.outOf, status: r.status, reason: r.reason }; });
-      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: grades(s.id), cfg: { nTests: nTestsOf(c), maxPart: S.settings.maxPart, maxAbs: S.settings.maxAbs, maxCahier: S.settings.maxCahier, maxTravail: S.settings.maxTravail, absPenalty: S.settings.absPenalty, cahierChecks: S.settings.cahierChecks, travailCount: S.settings.travailCount }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
+      const rec = { name: name(s), n: s.n, cls: c.name, card: s.card, g, comp: grades(s.id), cfg: { nTests: nTestsOf(c), weightTests: S.settings.weightTests, maxPart: S.settings.maxPart, maxAbs: S.settings.maxAbs, maxCahier: S.settings.maxCahier, maxTravail: S.settings.maxTravail, absPenalty: S.settings.absPenalty, cahierChecks: S.settings.cahierChecks, travailCount: S.settings.travailCount }, log: (S.log[s.id] || []).slice(-300), abs: absDates, cards, quizzes };
       out.records[c.id + ':' + s.n] = await CK.seal(rec, s.pin);
       progress && progress(++i, all.length);
     }
@@ -850,6 +850,7 @@
         <div class="grid2">
         <label class="f">Participation — max<input type="number" id="s_maxPart" min="1" max="20" step="0.5" value="${st.maxPart}"></label>
         <label class="f">Absence — max<input type="number" id="s_maxAbs" min="1" max="20" step="0.5" value="${st.maxAbs}"></label>
+        <label class="f">Part des contrôles dans la note générale (0.75 = 75 %, activités = le reste)<input type="number" id="s_weightTests" min="0" max="1" step="0.05" value="${st.weightTests}"></label>
         <label class="f">Points retirés par séance d’absence<input type="number" id="s_absPenalty" min="0" max="5" step="0.25" value="${st.absPenalty}"></label>
         <label class="f">Organisation du cahier — max<input type="number" id="s_maxCahier" min="1" max="20" step="0.5" value="${st.maxCahier}"></label>
         <label class="f">Contrôles du cahier<select id="s_cahierChecks"><option value="2" ${st.cahierChecks === 2 ? 'selected' : ''}>2 contrôles (moyenne)</option><option value="1" ${st.cahierChecks === 1 ? 'selected' : ''}>1 contrôle</option></select></label>

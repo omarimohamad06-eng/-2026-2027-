@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mes notes — ClassKit</title>
 <meta name="theme-color" content="#1f1d1a">
-<link rel="stylesheet" href="css/ck.css?v=20261123c">
+<link rel="stylesheet" href="css/ck.css?v=20261124a">
 <style>
   main{max-width:640px}
   .big{font-size:34px;font-weight:800}
@@ -25,7 +25,7 @@
 <body>
 <header class="top"><div class="brand"><i>✦</i>Mes notes</div><span class="spacer"></span><a href="quiz.html" class="btn sm">Quiz</a><button class="btn sm hidden" id="out">Déconnexion</button></header>
 <main id="m"><div class="panel">Loading…</div></main>
-<script src="js/shared.js?v=20261123c"></script>
+<script src="js/shared.js?v=20261124a"></script>
 <script>
 (function () {
   const { esc, fmt } = CK;
@@ -89,7 +89,8 @@
     const d = t => new Date(t).toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     m.innerHTML = `
       <div class="panel"><div class="row"><div><div class="ar" style="font-size:20px;font-weight:800">${esc(r.name)}</div><div class="muted small">${esc(r.cls)} · N° ${r.n}</div></div><span class="spacer"></span>
-        <div style="text-align:center"><div class="big">${fmt(k.final)}</div><div class="small muted">note finale /20</div></div></div></div>
+        <div style="text-align:center"><div class="big">${fmt(k.final)}</div><div class="small muted">note générale /20</div></div></div>
+        ${k.testsAvg != null ? `<p class="small muted" style="margin:8px 0 0">Moyenne des contrôles ${fmt(k.testsAvg)} × ${Math.round(k.weightTests * 100)} % + activités ${fmt(k.act)} × ${Math.round((1 - k.weightTests) * 100)} % = <b>${fmt(k.final)}</b></p>` : ''}</div>
       <div class="kpis"><div class="kpi"><b>${fmt(k.act)}</b><span class="small muted">Activités /20</span></div>${(k.tests || [k.t1, k.t2]).map((t, i) => `<div class="kpi"><b>${fmt(t)}</b><span class="small muted">Contrôle ${i + 1}</span></div>`).join('')}</div>
       <div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Activités intégrées</h3>
         <div class="line"><span>Participation</span><b>${fmt(k.part)} / ${mx.part}</b></div>${meter(k.part, mx.part)}

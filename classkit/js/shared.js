@@ -110,7 +110,7 @@
 
   /** Grade maths (SVT activités intégrées), shared so the portal shows exactly what the teacher sees.
       participation + absence + organisation du cahier + travail à rédiger → /20 (rescaled if the maxima don't add up to 20);
-      absence = max − penalty × sessions missed + manual adjustment. Final = mean of the contrôles entered and activités. */
+      absence = max − penalty × sessions missed + manual adjustment. Note générale = moyenne des contrôles × 75 % + activités × 25 % (weights configurable). */
   function computeGrades(gr, cfg, nAbs) {
     cfg = cfg || {};
     const M = { part: cfg.maxPart || 5, abs: cfg.maxAbs || 5, cah: cfg.maxCahier || 5, tra: cfg.maxTravail || 5 };
@@ -127,8 +127,10 @@
     const tests = [];
     for (let i = 1; i <= nTests; i++) tests.push(num(gr['t' + i]));
     const done = tests.filter(v => v != null);
-    const final = done.length ? (done.reduce((a, b) => a + b, 0) + act) / (done.length + 1) : null;
-    return { part, absence, nAbs, cahier, travail, act, tests, t1: tests[0], t2: tests[1], t3: tests[2] == null ? null : tests[2], nTests, final };
+    const w = cfg.weightTests == null ? 0.75 : cfg.weightTests;
+    const testsAvg = done.length ? done.reduce((a, b) => a + b, 0) / done.length : null;
+    const final = testsAvg == null ? null : testsAvg * w + act * (1 - w);
+    return { part, absence, nAbs, cahier, travail, act, tests, testsAvg, weightTests: w, t1: tests[0], t2: tests[1], t3: tests[2] == null ? null : tests[2], nTests, final };
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function fmt(v, d) {
