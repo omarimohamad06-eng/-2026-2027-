@@ -31,7 +31,7 @@
   /* section 1 — cards */
   .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm; }
   .cardbox { text-align: center; }
-  .cardbox .frame { width: 100%; height: 27mm; display: grid; place-items: center; background: var(--paper); border-radius: 3mm; overflow: hidden; position: relative; }
+  .cardbox .frame { width: 100%; height: 26mm; display: grid; place-items: center; background: var(--paper); border-radius: 3mm; overflow: hidden; position: relative; }
   .cardbox .badge { position: absolute; top: 1mm; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; font-weight: 900; font-size: 4.2mm; border-radius: 2mm; padding: .4mm 2mm; z-index: 2; }
   .cardbox img { height: 21mm; width: auto; box-shadow: 0 .6mm 2mm rgba(0,0,0,.18); }
   .cardbox .ans { font-size: 4.2mm; font-weight: 800; margin-top: 1.5mm; }
@@ -54,7 +54,7 @@
   .crit .c .pts { font-size: 6mm; font-weight: 900; letter-spacing: -.03em; color: var(--green); line-height: 1.1; }
   .crit .c p { margin: .6mm 0 0; font-size: 3.3mm; line-height: 1.3; }
   .crit .eq { grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 2mm; font-size: 4.4mm; font-weight: 900; padding: 1.2mm; background: var(--ink); color: #fff; border-radius: 3.5mm; }
-  .final { margin-top: 2mm; line-height: 1.6; background: var(--paper); border-radius: 3.5mm; padding: 2mm 3.5mm; font-size: 3.9mm; display: flex; gap: 4mm; align-items: center; flex-wrap: wrap; }
+  .final { margin-top: 1.5mm; line-height: 1.45; background: var(--paper); border-radius: 3.5mm; padding: 2mm 3.5mm; font-size: 3.9mm; display: flex; gap: 4mm; align-items: center; flex-wrap: wrap; }
   .final code { font: 800 3.7mm system-ui; background: #fff; border: .4mm solid var(--line); border-radius: 2mm; padding: 1mm 2.5mm; }
   /* section 4 — quiz */
   .s4 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3.5mm; }
@@ -104,7 +104,7 @@
       <div class="c"><div class="hd"><b>Travail à rédiger</b><span class="pts">/5</span></div><p>Rendu à temps, soigné, personnel.</p></div>
       <div class="eq">Total = Activités intégrées /20</div>
     </div>
-    <div class="final"><div><b>Note générale</b> =<br><code>moy. des contrôles × 0,75 + activités × 0,25</code><br><span class="muted">2 contrôles par semestre (3 en 2BAC SVT). Ex. : (12 + 14) ÷ 2 = 13 → 13 × 0,75 + 16 × 0,25 = <b>13,75</b></span></div></div>
+    <div class="final"><div><b>Note générale</b> =<br><code>moy. des contrôles × 0,75 + activités × 0,25</code><br><span class="muted">Ex. : (12 + 14) ÷ 2 = 13 → 13 × 0,75 + 16 × 0,25 = <b>13,75</b> · 3 contrôles en 2BAC SVT</span></div></div>
   </section>
 
   </div>
