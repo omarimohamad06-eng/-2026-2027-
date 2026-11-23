@@ -15,7 +15,7 @@
     v: 1,
     settings: {
       teacher: '', school: '', year: '2026/2027', subject: 'SVT',
-      maxPart: 5, maxAbs: 5, maxCahier: 5, maxTravail: 5, absPenalty: 0.5, cahierChecks: 2, travailCount: 2, step: 0.5,
+      maxPart: 5, maxAbs: 5, maxCahier: 5, maxTravail: 5, absPenalty: 0.5, cahierChecks: 1, travailCount: 1, step: 0.5,
       portalUrl: '', gh: { owner: '', repo: '', branch: '', path: 'classkit/data/portal.json', token: '' },
       blurNames: false,
     },
@@ -27,6 +27,8 @@
   try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || 'null') || {}); } catch (e) { S = blank(); }
   S.settings = Object.assign(blank().settings, S.settings);
   S.ui.date = S.ui.date || today();
+  // v2: one column each for cahier and travail à rédiger (the earlier default was two, averaged).
+  if (!S.settings.oneColumnEach) { S.settings.cahierChecks = 1; S.settings.travailCount = 1; S.settings.oneColumnEach = true; }
   let saveT = 0;
   function save() {
     clearTimeout(saveT);

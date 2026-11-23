@@ -29,8 +29,8 @@ All data stays in the browser on that computer (localStorage). Go to **Settings 
 |---|---|---|
 | **Participation** | 5 | +/− in the gradebook, or tap the student on the seating plan (Points mode) |
 | **Absence** | 5 | **automatic**: 5 − 0.5 for each session the student was marked absent; +/− buttons to adjust (e.g. a justified absence) |
-| **Organisation du cahier** | 5 | 2 checks per semester, averaged (or 1 check) |
-| **Travail à rédiger** | 5 | 2 pieces of written work, averaged (or 1) |
+| **Organisation du cahier** | 5 | one score (Settings can switch to 2 checks, averaged) |
+| **Travail à rédiger** | 5 | one score (Settings can switch to 2 pieces, averaged) |
 
 The maxima, the penalty per absence and the number of checks are set in **Settings → Barème**. If the maxima don't add up to 20,
 the score is scaled to /20. **Note finale** = average of Contrôle 1, Contrôle 2 and Activités intégrées.
