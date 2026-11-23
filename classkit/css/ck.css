@@ -134,4 +134,49 @@ table.list{border-collapse:collapse;width:100%}
   .seat .num{font-size:16px}.seat .nm{font-size:11px}.seat .st{font-size:10.5px}
   .top{padding:8px 10px}
 }
+
+/* ───────── logo & motion ───────── */
+.mk{display:block;color:inherit;overflow:visible}
+.mk .fl{fill:currentColor}
+.mk.draw .fl{animation:mkFill .55s .85s ease both}
+.mk.draw .fl.p2{animation-delay:1.05s}
+.mk .st{fill:none;stroke:currentColor;stroke-width:9;stroke-linejoin:round;stroke-dasharray:1;opacity:0;animation:mkDraw 1.5s cubic-bezier(.6,0,.3,1) both}
+.mk .st.p2{animation-delay:.2s}
+@keyframes mkDraw{0%{stroke-dashoffset:1;opacity:1}70%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes mkFill{from{opacity:0}to{opacity:1}}
+.brand .mk{width:30px;height:30px;padding:4px;border-radius:8px;background:var(--ink);color:#fff;box-sizing:border-box}
+.brand:hover .mk .fl{animation:mkWiggle .6s ease}
+@keyframes mkWiggle{30%{transform:translateY(-14px)}60%{transform:translateY(4px)}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.85)}70%{transform:scale(1.04)}100%{opacity:1;transform:none}}
+@keyframes popIn{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:none}}
+@keyframes flashUp{0%{background:#bbf7d0;transform:scale(1.25)}100%{background:transparent;transform:none}}
+@keyframes flashDown{0%{background:#fecaca;transform:scale(1.25)}100%{background:transparent;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@keyframes dialogIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.enter > *{animation:fadeUp .35s ease both}
+.enter > *:nth-child(2){animation-delay:.05s}.enter > *:nth-child(3){animation-delay:.1s}.enter > *:nth-child(4){animation-delay:.15s}.enter > *:nth-child(5){animation-delay:.2s}
+.enter .seat{animation:pop .4s ease both;animation-delay:calc(var(--i,0) * 14ms)}
+.seat{transition:transform .08s,background-color .25s,border-color .25s,box-shadow .2s}
+.seat:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.btn,.tab,.classpick button,.reasons button,.seg button{transition:transform .12s,background-color .2s,color .2s,border-color .2s,box-shadow .2s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.btn:active:not(:disabled),.reasons button:active,.classpick button:active{transform:scale(.96)}
+.step span.up{animation:flashUp .6s ease;border-radius:6px}
+.step span.down{animation:flashDown .6s ease;border-radius:6px}
+.oral{transition:background-color .3s,color .3s,border-color .3s}
+.oral.bump{animation:popIn .4s ease}
+.answered div.new{animation:popIn .45s ease}
+.bar .t i{transition:width .6s cubic-bezier(.3,.7,.2,1)}
+.overlay{animation:overlayIn .2s ease both}
+.overlay .dialog{animation:dialogIn .25s ease both}
+.toast{animation:toastIn .25s ease both}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 @media print{.noprint{display:none!important} body{background:#fff}}

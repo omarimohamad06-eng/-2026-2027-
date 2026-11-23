@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="190 192 900 900">
+  <defs><clipPath id="m2"><path d="M334 0H1280V1280H915Z"/></clipPath></defs>
+  <g fill="#000" fill-rule="evenodd">
+    <path d="M259 912L503 372L748 912H579L440 606L301 912Z M453 558L503 446L700 882H598Z"/>
+    <g clip-path="url(#m2)"><path d="M259 912L503 372L748 912H579L440 606L301 912Z M453 558L503 446L700 882H598Z" transform="translate(274 0)"/></g>
+  </g>
+</svg>

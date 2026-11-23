@@ -5,22 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClassKit — Teacher</title>
 <meta name="theme-color" content="#1f1d1a">
-<link rel="stylesheet" href="css/ck.css?v=20261124a">
+<link rel="icon" href="img/logo-tile.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/ck.css?v=20261124b">
 </head>
 <body>
 <header class="top noprint">
-  <div class="brand"><i>✦</i>ClassKit <span class="small muted" style="font-weight:500" title="Version">v2026.11.24</span></div>
+  <div class="brand" id="brand"><span id="brandmark"></span>ClassKit <span class="small muted" style="font-weight:500" title="Version">v2026.11.24</span></div>
   <div id="classpick" class="classpick"></div>
   <span class="spacer"></span>
   <nav id="tabs" class="tabs"></nav>
 </header>
 <main id="view"></main>
 
-<script src="vendor/qrcode.js?v=20261124a"></script>
-<script src="vendor/jsQR.js?v=20261124a"></script>
-<script src="js/shared.js?v=20261124a"></script>
-<script src="js/scanner.js?v=20261124a"></script>
-<script src="js/banks.js?v=20261124a"></script>
-<script src="js/app.js?v=20261124a"></script>
+<script src="vendor/qrcode.js?v=20261124b"></script>
+<script src="vendor/jsQR.js?v=20261124b"></script>
+<script src="js/shared.js?v=20261124b"></script>
+<script src="js/scanner.js?v=20261124b"></script>
+<script src="js/banks.js?v=20261124b"></script>
+<script>document.getElementById('brandmark').outerHTML = CK.logo({ draw: true });</script>
+<script src="js/app.js?v=20261124b"></script>
 </body>
 </html>

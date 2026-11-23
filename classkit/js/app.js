@@ -157,11 +157,28 @@
     $$('#tabs .tab').forEach(b => b.onclick = () => { stopScan(); S.ui.tab = b.dataset.t; save(); render(); });
   }
 
+  let lastView = '';
   function render() {
     chrome();
     const v = $('#view');
-    if (!S.classes.length && !['settings'].includes(S.ui.tab)) return renderWelcome(v);
-    ({ seating: renderSeating, grades: renderGrades, cards: renderCards, quiz: renderQuiz, students: renderStudents, publish: renderPublish, settings: renderSettings }[S.ui.tab] || renderSeating)(v);
+    v.classList.remove('enter');
+    if (!S.classes.length && !['settings'].includes(S.ui.tab)) renderWelcome(v);
+    else ({ seating: renderSeating, grades: renderGrades, cards: renderCards, quiz: renderQuiz, students: renderStudents, publish: renderPublish, settings: renderSettings }[S.ui.tab] || renderSeating)(v);
+    // Entrance animation only when the screen really changes (tab, class or editor), not on every tap.
+    const key = S.ui.tab + '|' + S.ui.cls + '|' + (editing ? editing.id : '');
+    if (key !== lastView) {
+      lastView = key;
+      void v.offsetWidth;
+      v.classList.add('enter');
+      $$('.seats .seat', v).forEach((el, i) => el.style.setProperty('--i', i));
+    }
+  }
+  /** Briefly flash a value green (+) or red (−), or pop it (no direction). */
+  function flash(el, up) {
+    if (!el) return;
+    el.classList.remove('up', 'down', 'bump');
+    void el.offsetWidth;
+    el.classList.add(up == null ? 'bump' : up ? 'up' : 'down');
   }
 
   function renderWelcome(v) {
@@ -309,13 +326,15 @@
         <div class="small">${recent.map(logLine).join('<br>') || '<span class="muted">No changes yet.</span>'}</div>
         <div class="row" style="margin-top:12px"><span class="spacer"></span><button class="btn pri" id="pd">Done</button></div>`;
     };
-    let reason = '';
+    let reason = '', last = null;
     dialog('', (d, close) => {
       const mount = () => {
         d.innerHTML = draw();
+        if (last) flash($('.step[data-f="' + last.f + '"] span', d), last.up);
         $$('.step button', d).forEach(b => b.onclick = () => {
           const f = b.closest('.step').dataset.f;
           bump(sid, f, (b.classList.contains('p') ? 1 : -1) * S.settings.step, reason);
+          last = { f, up: b.classList.contains('p') };
           reason = ''; mount();
         });
         $$('.reasons button', d).forEach(b => b.onclick = () => {
@@ -380,7 +399,10 @@
         const f = b.closest('.step').dataset.f;
         const why = f === 'absAdj' ? (b.classList.contains('p') ? 'Absence justifiée / régularisée' : 'Ajustement absence') : '';
         bump(tr.dataset.sid, f, (b.classList.contains('p') ? 1 : -1) * S.settings.step, why);
-        return refreshRow(tr);
+        refreshRow(tr);
+        flash($('span', b.closest('.step')), b.classList.contains('p'));
+        flash($('[data-o]', tr));
+        return;
       }
       if (e.target.closest('[data-act=hist]')) historyDialog(tr.dataset.sid);
     });
@@ -543,6 +565,7 @@
       <div class="answered" style="margin-top:8px">${c.students.map(s => {
         const a = live.answers[s.id];
         let k = a ? 'done' : '';
+        if (a && !(live.shown || (live.shown = new Set())).has(s.id)) { k += ' new'; live.shown.add(s.id); }
         if (a && live.reveal && live.correct) k = a === live.correct ? 'right' : 'wrong';
         return `<div class="${k} ${abs.has(s.id) ? 'absent' : ''}" title="${esc(name(s))}">${s.n}${a && live.reveal ? '<sup>' + a + '</sup>' : ''}</div>`;
       }).join('')}</div>`;
@@ -560,18 +583,19 @@
     w.document.close();
   }
   function printCards(c, per) {
+    const lg = CK.logo();
     const card = s => `<div class="card"><div class="hd"><b>No. ${s.n}</b><span class="ar">${esc(name(s))}</span><b>${esc(c.name)}</b></div>
       <div class="L t">A</div><div class="L r">B</div><div class="L b">C</div><div class="L l">D</div>
       <div class="q">${qrSvg('CK' + s.card, { ec: 'M', mode: 'Alphanumeric', margin: 0 })}</div>
-      <div class="ft"><span>${esc(c.name)}</span><span>Card ${s.card}</span></div></div>`;
+      <div class="ft"><span>${esc(c.name)}</span><span class="lg">${lg}</span><span>Card ${s.card}</span></div></div>`;
     const css = per === 4
       ? `.pg{width:210mm;height:297mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;page-break-after:always}
          .card{position:relative;border:1px dashed #bbb;padding:10mm 9mm}.q svg{width:70mm;height:70mm;display:block;margin:12mm auto 0}
-         .hd,.ft{display:flex;justify-content:space-between;font-size:11pt;color:#444}.ft{position:absolute;bottom:7mm;left:9mm;right:9mm;font-size:9pt;color:#888}
+         .hd,.ft{display:flex;justify-content:space-between;font-size:11pt;color:#444}.ft{position:absolute;bottom:7mm;left:9mm;right:9mm;font-size:9pt;color:#888;align-items:center}.lg svg{width:9mm;height:9mm;display:block;color:#bbb}.mk .fl{fill:currentColor}
          .L{position:absolute;font-weight:800;color:#999;font-size:12pt}`
       : `.pg{width:210mm;height:297mm;page-break-after:always}.card{position:relative;height:297mm;padding:26mm 22mm}
          .q svg{width:150mm;height:150mm;display:block;margin:28mm auto 0}.hd,.ft{display:flex;justify-content:space-between;font-size:18pt;color:#444}
-         .ft{position:absolute;bottom:30mm;left:22mm;right:22mm;font-size:14pt;color:#888}.L{position:absolute;font-weight:800;color:#999;font-size:16pt}`;
+         .ft{position:absolute;bottom:30mm;left:22mm;right:22mm;font-size:14pt;color:#888;align-items:center}.lg svg{width:16mm;height:16mm;display:block;color:#bbb}.mk .fl{fill:currentColor}.L{position:absolute;font-weight:800;color:#999;font-size:16pt}`;
     const pos = `.L.t{top:${per === 4 ? '19mm' : '40mm'};left:50%;transform:translateX(-50%)}
       .L.b{bottom:${per === 4 ? '16mm' : '52mm'};left:50%;transform:translateX(-50%) rotate(180deg)}
       .L.r{right:${per === 4 ? '3mm' : '6mm'};top:50%;transform:translateY(-50%) rotate(90deg)}
@@ -760,8 +784,8 @@
     };
     $('#slips').onclick = () => {
       const base = portalBase();
-      printWindow(`${c.name} PINs`, `@page{size:A4;margin:10mm}.w{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}.s{border:1px dashed #aaa;padding:8px 10px;font-size:10.5pt;height:42mm;page-break-inside:avoid;display:grid;grid-template-columns:1fr 26mm;gap:6px;align-items:center}.p{font:700 16pt ui-monospace,monospace;letter-spacing:.12em}.u{font-size:7.5pt;color:#555;word-break:break-all}svg{width:26mm;height:26mm}`,
-        `<div class="w">${c.students.map(s => `<div class="s"><div><b class="ar">${esc(name(s))}</b><br>${esc(c.name)} · No. ${s.n}<br>PIN: <span class="p">${s.pin}</span><div class="u">${esc(base || 'portal.html')}</div></div>${base ? qrSvg(base + 'portal.html', { ec: 'L' }) : ''}</div>`).join('')}</div>`);
+      printWindow(`${c.name} PINs`, `@page{size:A4;margin:10mm}.w{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}.s{border:1px dashed #aaa;padding:8px 10px;font-size:10.5pt;height:42mm;page-break-inside:avoid;display:grid;grid-template-columns:1fr 26mm;gap:6px;align-items:center}.p{font:700 16pt ui-monospace,monospace;letter-spacing:.12em}.lg svg{width:7mm;height:7mm;display:inline-block;vertical-align:middle;margin-right:2mm}.mk .fl{fill:currentColor}.u{font-size:7.5pt;color:#555;word-break:break-all}svg{width:26mm;height:26mm}`,
+        `<div class="w">${c.students.map(s => `<div class="s"><div><span class="lg">${CK.logo()}</span><b class="ar">${esc(name(s))}</b><br>${esc(c.name)} · No. ${s.n}<br>PIN: <span class="p">${s.pin}</span><div class="u">${esc(base || 'portal.html')}</div></div>${base ? qrSvg(base + 'portal.html', { ec: 'L' }) : ''}</div>`).join('')}</div>`);
     };
   }
   function portalBase() {

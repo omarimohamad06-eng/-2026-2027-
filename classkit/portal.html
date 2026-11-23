@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mes notes — ClassKit</title>
 <meta name="theme-color" content="#1f1d1a">
-<link rel="stylesheet" href="css/ck.css?v=20261124a">
+<link rel="icon" href="img/logo-tile.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/ck.css?v=20261124b">
 <style>
   main{max-width:640px}
   .big{font-size:34px;font-weight:800}
@@ -13,7 +14,16 @@
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
   .kpi b{display:block;font-size:22px}
   .meter{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:4px}
-  .meter i{display:block;height:100%;background:var(--accent)}
+  .meter i{display:block;height:100%;background:var(--accent);transform-origin:left;animation:grow 1s .25s cubic-bezier(.3,.7,.2,1) both}
+  .splash{min-height:60vh;display:grid;place-content:center;justify-items:center;gap:6px;color:var(--ink)}
+  .splash .mk{width:110px;height:110px}
+  .splash p{color:var(--muted);font-weight:600;animation:fadeUp .5s 1s both}
+  .loginmark{width:64px;height:64px;padding:10px;border-radius:16px;background:var(--ink);color:#fff;margin:0 auto 6px}
+  .loginmark .mk{width:100%;height:100%}
+  .panel.shake{animation:shake .45s ease}
+  #m.enter > *{animation:fadeUp .45s ease both}
+  #m.enter > *:nth-child(2){animation-delay:.07s}#m.enter > *:nth-child(3){animation-delay:.14s}#m.enter > *:nth-child(4){animation-delay:.21s}#m.enter > *:nth-child(5){animation-delay:.28s}#m.enter > *:nth-child(n+6){animation-delay:.35s}
+  .ev{animation:fadeUp .4s ease both}
   .line{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin:10px 0}
   .ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #eee7da;font-size:14px}
   .ev .d{font-weight:800;min-width:44px;text-align:center;border-radius:8px;padding:2px 0}
@@ -23,13 +33,15 @@
 </style>
 </head>
 <body>
-<header class="top"><div class="brand"><i>✦</i>Mes notes</div><span class="spacer"></span><a href="quiz.html" class="btn sm">Quiz</a><button class="btn sm hidden" id="out">Déconnexion</button></header>
-<main id="m"><div class="panel">Loading…</div></main>
-<script src="js/shared.js?v=20261124a"></script>
+<header class="top"><div class="brand"><span id="brandmark"></span>Mes notes</div><span class="spacer"></span><a href="quiz.html" class="btn sm">Quiz</a><button class="btn sm hidden" id="out">Déconnexion</button></header>
+<main id="m"><div class="splash" id="splash"></div></main>
+<script src="js/shared.js?v=20261124b"></script>
 <script>
 (function () {
   const { esc, fmt } = CK;
   const m = document.getElementById('m');
+  document.getElementById('brandmark').outerHTML = CK.logo({ draw: true });
+  document.getElementById('splash').innerHTML = CK.logo({ draw: true }) + '<p>Chargement…</p>';
   const MEM = 'classkit.portal.login';
   let data;
   const FL = { part: 'Participation', absAdj: 'Absence (ajustement)', cb1: 'Organisation du cahier', cb2: 'Organisation du cahier (2e contrôle)', tr1: 'Travail à rédiger 1', tr2: 'Travail à rédiger 2', t1: 'Contrôle 1', t2: 'Contrôle 2', t3: 'Contrôle 3' };
@@ -51,7 +63,9 @@
 
   function loginForm(err) {
     document.getElementById('out').classList.add('hidden');
-    m.innerHTML = `<div class="panel">
+    m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter');
+    m.innerHTML = `<div class="panel ${err ? 'shake' : ''}">
+      <div class="loginmark">${CK.logo({ draw: !err })}</div>
       <h2>Connexion</h2>
       <p class="muted small">${esc(data.subject || '')} ${data.teacher ? '· ' + esc(data.teacher) : ''} · ${esc(data.year || '')}</p>
       <label class="f">Classe<select id="c">${data.classes.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label><br>
@@ -110,6 +124,10 @@
       ${r.cards && r.cards.length ? `<div class="panel"><h3 style="margin-top:0">Questions avec les cartes QR</h3>${r.cards.slice().reverse().map(x => `<div class="line"><span class="small"><span class="muted">${x.date}</span> <span class="ar">${esc(x.q || '')}</span></span><b>${x.a ? (x.ok ? (x.a === x.ok ? '✓ ' : '✗ ') + x.a : x.a) : '<span class="muted">—</span>'}</b></div>`).join('')}</div>` : ''}
       <div class="panel"><h3 style="margin-top:0">Absences</h3>${r.abs.length ? `<p><b>${r.abs.length}</b> séance(s) : ${r.abs.map(x => new Date(x).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })).join(', ')}</p>` : '<p class="muted">Aucune 👏</p>'}</div>
       <p class="small muted" style="text-align:center">Mis à jour le ${new Date(data.updated).toLocaleString('fr-FR')}</p>`;
+    // motion: panels slide in one after another, bars grow, grades count up
+    m.classList.remove('enter'); void m.offsetWidth; m.classList.add('enter');
+    CK.countUp(m.querySelector('.big'), k.final);
+    m.querySelectorAll('.kpi b').forEach((el, i) => CK.countUp(el, [k.act].concat(k.tests || [k.t1, k.t2])[i]));
   }
   load();
 })();

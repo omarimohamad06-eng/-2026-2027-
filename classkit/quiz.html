@@ -6,7 +6,8 @@
 <meta name="google" content="notranslate">
 <title>Quiz — ClassKit</title>
 <meta name="theme-color" content="#0f172a">
-<link rel="stylesheet" href="css/ck.css?v=20261124a">
+<link rel="icon" href="img/logo-tile.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/ck.css?v=20261124b">
 <style>
   :root{--qbg:#0f172a;--qcard:#151515;--qline:#2a2f3a}
   body{background:var(--qbg);color:#e5e7eb;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -31,17 +32,30 @@
   .code{font:700 13px ui-monospace,monospace;color:#9ca3af;word-break:break-all;text-align:center}
   .rules li{margin:6px 0}
   .muted{color:#9ca3af}
+  /* motion */
+  .qc{animation:fadeUp .35s ease both}
+  .opt{transition:border-color .2s,background-color .2s,transform .12s}
+  .opt:active{transform:scale(.98)}
+  .opt.sel{animation:popIn .3s ease}
+  .bar i{transition:width .5s ease}
+  .icon{animation:popIn .5s .15s ease both}
+  .qc.out{animation:shake .5s ease}
+  .qmark{width:58px;height:58px;color:#fff;margin:0 auto 6px}
+  .splash{min-height:70vh;display:grid;place-content:center;justify-items:center;color:#fff}
+  .splash .mk{width:110px;height:110px}
+  .splash p{color:#9ca3af;font-weight:600;animation:fadeUp .5s 1s both}
 </style>
 </head>
 <body>
-<main id="m"><div class="qc">Loading…</div></main>
-<script src="vendor/qrcode.js?v=20261124a"></script>
-<script src="js/shared.js?v=20261124a"></script>
+<main id="m"><div class="splash" id="splash"></div></main>
+<script src="vendor/qrcode.js?v=20261124b"></script>
+<script src="js/shared.js?v=20261124b"></script>
 <script>
 (function () {
   'use strict';
   const { esc, fmt } = CK;
   const m = document.getElementById('m');
+  document.getElementById('splash').innerHTML = CK.logo({ draw: true }) + '<p>Chargement…</p>';
   let data, me, quiz, att, attKey, timerT = 0;
   const REASON_TEXT = { L: 'Tu as quitté la page du quiz.', T: 'La page a été traduite.', R: 'Écran partagé ou fenêtre flottante utilisé.', C: 'La copie est interdite.', S: 'Touche de capture d’écran.' };
 
@@ -56,7 +70,7 @@
   }
 
   function login(saved, err) {
-    m.innerHTML = `<div class="qc"><h2>Quiz</h2>
+    m.innerHTML = `<div class="qc ${err ? 'out' : ''}"><div class="qmark">${CK.logo({ draw: !err })}</div><h2 class="center">Quiz</h2>
       <label class="f">Classe<select id="c">${data.classes.map(c => `<option value="${c.id}" ${saved && saved.c === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label><br>
       <label class="f">Ton numéro<input type="number" id="n" inputmode="numeric" value="${saved ? saved.n : ''}"></label><br>
       <label class="f">Ton code PIN<input type="text" id="p" autocomplete="off" autocapitalize="characters" value="${saved ? esc(saved.p) : ''}" style="letter-spacing:.2em;text-transform:uppercase"></label>
@@ -219,7 +233,7 @@
     const body = ['R1', quiz.id.toUpperCase(), me.card, ok, total, st, att.reason || '-', (att.end || Date.now()).toString(36).toUpperCase()].join('.');
     const code = body + '.' + await CK.sign(body, quiz.secret);
     const removed = att.status === 'removed';
-    m.innerHTML = `<div class="qc center">
+    m.innerHTML = `<div class="qc center ${removed ? 'out' : ''}">
       <div class="icon">${removed ? '🚫' : att.status === 'timeup' ? '⏱' : '✅'}</div>
       <h2 class="${removed ? 'red' : 'green'}">${removed ? 'Exclu du quiz' : att.status === 'timeup' ? 'Temps écoulé' : 'Quiz terminé'}</h2>
       ${removed ? `<p>${REASON_TEXT[att.reason] || ''}</p><p class="muted">Note au moment de l’exclusion :</p>` : '<p class="muted">Ta note :</p>'}
